@@ -1,0 +1,5 @@
+export default {
+  fcm: {
+    key: 'AAAA9wAd3fA:APA91bE6CySpQIK0EuDCMU_hkES5IOvJ1MPiBSrIB9Q7m7PKNvv-6M4Hug31o9P11QD9KI6gt0lHzC5xySzsXrBPTRmDj7tXy_HQpmOry7Ki2Lu3uJYQfM6ifOsV8aB07p7uPQoJYIW57mGDDufun6xf07abKzXLaA',
+  }
+}
