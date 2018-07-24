@@ -1,3 +1,28 @@
 {
-  "presets": ["react-native"]
+  "presets": ["react-native"],
+  "plugins": [
+    [
+      "module-resolver",
+      {
+        "root": ["./src"],
+        "alias": {
+          "src": "./src",
+          "assets": "./assets",
+          "i18n": "./src/i18n",
+          "core": "./src/core",
+          "modals": "./src/modals",
+          "screens": "./src/screens",
+          "services": "./src/services",
+          "components": "./src/components",
+          "config": "./src/config"
+        }
+      }
+    ],
+    "transform-decorators-legacy"
+  ],
+  "env": {
+    "production": {
+      "plugins": ["transform-remove-console"]
+    }
+  }
 }

@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "1060858879472",
+    "firebase_url": "https://lotus-9a785.firebaseio.com",
+    "project_id": "lotus-9a785",
+    "storage_bucket": "lotus-9a785.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1060858879472:android:861cd31ea9f446d6",
+        "android_client_info": {
+          "package_name": "com.nisdos.lotus"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1060858879472-spqp1khgrir648kch2vu14e0t7llt5rt.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.nisdos.lotus",
+            "certificate_hash": "1607fd23cc8944fb8bbb1ef4fedf36e98c53ab8b"
+          }
+        },
+        {
+          "client_id": "1060858879472-h1muto57hg98mp345338242vt02kpv7n.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyANKUmf29zaTHXCSoe-G2T-Rb56A7BUCJI"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1060858879472-h1muto57hg98mp345338242vt02kpv7n.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
