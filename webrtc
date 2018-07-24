@@ -1,0 +1,26 @@
+#!/bin/sh
+
+cd "$(dirname "$(realpath "$0")")";
+
+if [ $# = 1 ]
+then
+    if [ $1 = "pack" ]
+    then
+        cd node_modules/react-native-webrtc/tools/
+        node ios_arch.js --extract
+        node ios_arch.js --device
+        cd -
+        rm node_modules/react-native-webrtc/ios/WebRTC.framework/WebRTC-*
+    elif [ $1 = "reset" ]
+    then
+        rm -rf node_modules/react-native-webrtc
+        npm cache clean
+        echo "Run 'Product -> clean' in XCode and press any key"
+        read
+        npm install react-native-webrtc
+    else
+        echo "Parameter not recognized. Allowed: pack, reset."
+    fi
+else
+    echo "USAGE: ./webrtc [pack | reset]"
+fi

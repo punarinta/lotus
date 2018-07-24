@@ -1,4 +1,4 @@
-package com.lotus;
+package com.nisdos.lotus;
 
 import com.facebook.react.ReactActivity;
 
