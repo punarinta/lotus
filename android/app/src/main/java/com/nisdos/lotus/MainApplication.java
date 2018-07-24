@@ -14,6 +14,8 @@ import java.util.Arrays;
 import java.util.List;
 
 import com.oney.WebRTCModule.WebRTCModulePackage;
+import io.invertase.firebase.notifications.RNFirebaseNotificationsPackage;
+import io.invertase.firebase.messaging.RNFirebaseMessagingPackage;
 
 public class MainApplication extends Application implements ReactApplication {
 
@@ -27,9 +29,11 @@ public class MainApplication extends Application implements ReactApplication {
     protected List<ReactPackage> getPackages() {
       return Arrays.<ReactPackage>asList(
           new MainReactPackage(),
-            new RNFirebasePackage(),
-            new InCallManagerPackage(),
-          new WebRTCModulePackage()
+          new InCallManagerPackage(),
+          new WebRTCModulePackage(),
+          new RNFirebasePackage(),
+          new RNFirebaseMessagingPackage(),
+          new RNFirebaseNotificationsPackage()
       );
     }
 
