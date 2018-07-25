@@ -9,7 +9,7 @@ import { FcmSvc, RTC_EXCHANGE } from 'services/fcm'
 import { store } from 'core'
 import firebase from 'react-native-firebase'
 
-const webRTCConfig = {'iceServers': [{'urls': 'stun:stun.l.google.com:19302'}]}
+const webRTCConfig = {'iceServers': [{'urls': 'stun:stun.services.mozilla.com'}, {'urls': 'stun:stun.l.google.com:19302'}]}
 
 const MY_ID = 'vladimir.g.osipov-at-gmail.com'
 
@@ -39,7 +39,7 @@ export default class VideoScreen extends Component {
 
     if (data.cmd === 'rtc-exchange') {
       this.exchange(data)
-      // .then(() => console.log('socket.on: EXCHANGE'))
+      //  .then(() => console.log('socket.on: EXCHANGE'))
       //  .catch(err => console.log('ERR exchangeListener', err))
     }
   }
@@ -77,7 +77,6 @@ export default class VideoScreen extends Component {
   }
 
   componentWillUnmount() {
-    //store.unbind([RTC_EXCHANGE], this.exchangeListener)
     this.dbRef.off('child_added', this.dbListener)
     this.leaveChat(false)
   }
@@ -219,6 +218,8 @@ export default class VideoScreen extends Component {
         await pc.setLocalDescription(answer)
         const msg = this.dbRef.push({cmd: 'rtc-exchange', sdp: pc.localDescription, sessionId: $.sessionId, from: MY_ID})
         msg.remove()
+      } else {
+        console.log('ACHTUNG! have-local-offer')
       }
       if (data.sdp.type === 'answer') {
         pc.setRemoteDescription(new RTCSessionDescription(data.sdp))
