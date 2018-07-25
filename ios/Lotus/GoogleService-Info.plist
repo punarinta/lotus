@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>AD_UNIT_ID_FOR_BANNER_TEST</key>
+	<string>ca-app-pub-3940256099942544/2934735716</string>
+	<key>AD_UNIT_ID_FOR_INTERSTITIAL_TEST</key>
+	<string>ca-app-pub-3940256099942544/4411468910</string>
+	<key>CLIENT_ID</key>
+	<string>1060858879472-1d7h3n8nmrpd20823k3t54f5h2s8o2gp.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.1060858879472-1d7h3n8nmrpd20823k3t54f5h2s8o2gp</string>
+	<key>API_KEY</key>
+	<string>AIzaSyDLbEs5gdjbodJ8pA5rA2TqcZCy1Vc7lSU</string>
+	<key>GCM_SENDER_ID</key>
+	<string>1060858879472</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.nisdos.lotus</string>
+	<key>PROJECT_ID</key>
+	<string>lotus-9a785</string>
+	<key>STORAGE_BUCKET</key>
+	<string>lotus-9a785.appspot.com</string>
+	<key>IS_ADS_ENABLED</key>
+	<true></true>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<false></false>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:1060858879472:ios:861cd31ea9f446d6</string>
+	<key>DATABASE_URL</key>
+	<string>https://lotus-9a785.firebaseio.com</string>
+</dict>
+</plist>
