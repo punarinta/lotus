@@ -1,6 +1,6 @@
 import SplashScreen from 'screens/SplashScreen'
 import HomeScreen from 'screens/HomeScreen'
-import VideoScreen from 'screens/VideoScreen'
+import VideoScreen from 'screens/VideoScreen3'
 
 import Theme from 'config/theme'
 

@@ -124,7 +124,7 @@ const styles = StyleSheet.create({
   },
   text: {
     color: '#000',
-    fontSize: Theme.uiFontSize,
+    fontSize: Theme.uiFontSize18,
   },
   buttons: {
     marginTop: Theme.isTablet ? 32 : 16,

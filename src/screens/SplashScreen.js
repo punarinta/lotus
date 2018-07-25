@@ -4,6 +4,8 @@ import store from 'core/store'
 import Loader from 'components/Loader'
 import { NavigationActions, StackActions } from 'react-navigation'
 import I18n from 'i18n'
+import { SysSvc } from 'services/sys'
+import { FcmSvc } from 'services/fcm'
 import firebase from 'react-native-firebase'
 
 export default class SplashScreen extends Component {
@@ -42,25 +44,31 @@ export default class SplashScreen extends Component {
     window.$ = Object.assign({
       navigator: this.props.navigation,
       resetNavigationTo: this.resetNavigationTo,
+      sessionId: Math.random(),
     }, $)
 
     I18n.init('en_US')
 
-    this.messageListener = firebase.messaging().onMessage((message) => {
-      // data-only messages?
-      console.log('firebase.messaging().onMessage', message)
+    const channel = new firebase.notifications.Android.Channel('lotus', 'Lotus Channel', firebase.notifications.Android.Importance.Max).setDescription('Lotus Channel')
+    firebase.notifications().android.createChannel(channel)
+
+    this.messageListener = firebase.messaging().onMessage(FcmSvc.receive)
+
+    this.notificationListener = firebase.notifications().onNotification((notification) => {
+      // notification in a foreground, data possible
+      console.log('firebase.notifications().onNotification', notification)
+      SysSvc.alert(0, 'firebase.notifications().onNotification: ' + SysSvc.stringify(notification))
+    })
+    this.notificationOpenedListener = firebase.notifications().onNotificationOpened((notificationOpen) => {
+      // bg mode: full, message, data -- crash!!!
+      console.log('firebase.notifications().onNotificationOpened', notificationOpen)
+      SysSvc.alert(0, 'firebase.notifications().onNotificationOpened: ' + SysSvc.stringify(notificationOpen))
     })
 
     this.notificationDisplayedListener = firebase.notifications().onNotificationDisplayed((notification) => {
+      // ???
       console.log('firebase.notifications().onNotificationDisplayed', notification)
-    })
-    this.notificationListener = firebase.notifications().onNotification((notification) => {
-      // notification in a foreground
-      console.log('firebase.notifications().onNotification', notification)
-    })
-
-    this.notificationOpenedListener = firebase.notifications().onNotificationOpened((notificationOpen) => {
-      console.log('firebase.notifications().onNotificationOpened', notificationOpen)
+      SysSvc.alert(0, 'firebase.notifications().onNotificationDisplayed: ' + SysSvc.stringify(notification))
     })
 
     const notificationOpen = await firebase.notifications().getInitialNotification()
@@ -68,6 +76,7 @@ export default class SplashScreen extends Component {
       const action = notificationOpen.action
       const notification = notificationOpen.notification
       console.log('firebase.notifications().getInitialNotification', action, notification)
+      SysSvc.alert(0, 'firebase.notifications().getInitialNotification: ' + action + ', ' +  SysSvc.stringify(notification))
     }
 
     firebase.messaging().subscribeToTopic('topic-vladimir.g.osipov-at-gmail.com')
@@ -75,16 +84,19 @@ export default class SplashScreen extends Component {
     this.setState({hydrated: true})
   }
 
-  componentWillUnmount() {
+  /*componentWillUnmount() {
+    console.log('SplashScreen unmount')
     this.messageListener()
     this.notificationOpenedListener()
     this.notificationDisplayedListener()
     this.notificationListener()
-  }
+  }*/
 
   async componentDidUpdate(prevProps, prevState) {
     if (this.state.hydrated && !prevState.hydrated) {
       this.resetNavigationTo('Home')
+    } else {
+      console.log("this.resetNavigationTo('Home') failed")
     }
   }
 

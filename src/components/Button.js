@@ -44,7 +44,7 @@ const styles = StyleSheet.create({
     backgroundColor: Theme.activeGreen,
     height: Theme.uiHeight,
     minHeight: Theme.uiHeight,
-    borderRadius: 32,
+    borderRadius: 8,
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 32,
@@ -65,7 +65,7 @@ const styles = StyleSheet.create({
   },
   caption: {
     color: '#fff',
-    fontSize: Theme.uiFontSize,
+    fontSize: Theme.uiFontSize16,
     fontWeight: 'bold',
     textAlign: 'center',
   },

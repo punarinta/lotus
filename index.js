@@ -2,6 +2,7 @@ import { AppRegistry, NativeModules, Platform } from 'react-native'
 import ApplicationEntry from 'core/entry'
 import { name as appName } from './app.json'
 import I18n from 'i18n'
+import handleBackgroundMessage from 'services/bgDataFcm'
 
 I18n.init(Platform.OS === 'ios' ? NativeModules.SettingsManager.settings.AppleLocale : NativeModules.I18nManager.localeIdentifier)
 
@@ -15,4 +16,5 @@ if (__DEV__) {
   console.disableYellowBox = true
 }
 
+AppRegistry.registerHeadlessTask('RNFirebaseBackgroundMessage', handleBackgroundMessage)
 AppRegistry.registerComponent(appName, () => ApplicationEntry)

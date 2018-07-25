@@ -24,6 +24,24 @@ class SysSvc {
       config
     })
   }
+
+  /**
+   * Stringify anything
+   *
+   * @param obj
+   */
+  static stringify(obj) {
+    let seen = []
+    JSON.stringify(obj, function(key, val) {
+      if (val != null && typeof val === "object") {
+        if (seen.indexOf(val) >= 0) {
+          return val
+        }
+        seen.push(val)
+      }
+      return val
+    })
+  }
 }
 
 export { SysSvc, MBOX_OPEN }

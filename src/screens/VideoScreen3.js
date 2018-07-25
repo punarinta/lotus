@@ -7,11 +7,11 @@ import Theme from 'config/theme'
 import I18n from 'i18n'
 import { FcmSvc, RTC_EXCHANGE } from 'services/fcm'
 import { store } from 'core'
+import firebase from 'react-native-firebase'
 
 const webRTCConfig = {'iceServers': [{'urls': 'stun:stun.l.google.com:19302'}]}
 
-const pc = new RTCPeerConnection(webRTCConfig)
-let sendChannel = null
+const MY_ID = 'vladimir.g.osipov-at-gmail.com'
 
 export default class VideoScreen extends Component {
 
@@ -31,91 +31,55 @@ export default class VideoScreen extends Component {
     return this.props.navigation.state && this.props.navigation.state.params ? this.props.navigation.state.params : {}
   }
 
+  dbListener = (incoming) => {
+    const data = incoming.val()
+    if (data.sessionId === $.sessionId) {
+      return
+    }
+
+    if (data.cmd === 'rtc-exchange') {
+      this.exchange(data)
+      // .then(() => console.log('socket.on: EXCHANGE'))
+      //  .catch(err => console.log('ERR exchangeListener', err))
+    }
+  }
+
   async componentDidMount() {
+
+    this.dbRef = firebase.database().ref('vladimir-dot-g-dot-osipov-at-gmail-dot-com')
+
+    this.dbRef.on('child_added', this.dbListener)
+
+    this.peers = {}
 
     if (Platform.OS === 'ios' && InCallManager.recordPermission !== 'granted') {
       InCallManager.requestRecordPermission()
-        .then((requestedRecordPermissionResult) => console.log('InCallManager.requestRecordPermission() requestedRecordPermissionResult: ', requestedRecordPermissionResult))
-        .catch((err) =>  console.log('InCallManager.requestRecordPermission() catch: ', err))
+        .then((requestedRecordPermissionResult) => {
+          console.log('InCallManager.requestRecordPermission() requestedRecordPermissionResult: ', requestedRecordPermissionResult)
+        })
+        .catch((err) => {
+          console.log('InCallManager.requestRecordPermission() catch: ', err)
+        })
     }
 
-    /*this.getLocalStream(stream => {
+    this.getLocalStream(stream => {
       this.setState({stream})
-    })*/
+    })
 
-    pc.onicecandidate = async (event) => {
-      console.log('SIGNAL icecandidate')
-      if (event.candidate) {
-        await pc.addIceCandidate(new RTCIceCandidate(event.candidate))
-      }
-    }
-
-    pc.onnegotiationneeded = () => {
-      console.log('SIGNAL negotiationneeded')
-    }
-
-    pc.onaddstream = (event) => {
-      console.log('SIGNAL addstream')
-    }
-
-    pc.ondatachannel = (event) => {
-      console.log('SIGNAL datachannel')
-      let receiveChannel = event.channel
-      receiveChannel.onmessage = (event) => {
-        console.log('>> ' + event.data)
-      }
-    }
-
-    sendChannel = pc.createDataChannel('sendDataChannel')
-
-    if (this.navParams.sdp) {
-      console.log('Foreign sdp received')
-
-      await pc.setRemoteDescription(new RTCSessionDescription(this.navParams.sdp))
-      if (pc.remoteDescription.type === 'offer') {
-        if (pc.signalingState !== 'stable') {
-          const desc = await pc.createAnswer()
-          await pc.setLocalDescription(desc)
-
-          // exchange SDP with a peer
-          FcmSvc.sendRtc('vladimir.g.osipov-at-gmail.com', {cmd: 'acceptCall', sdp: pc.localDescription})
-
-        /*  if (this.state.stream) {
-            pc.addStream(this.state.stream)
-          } else {
-            console.log('Local stream was not attached')
-          }*/
-          sendChannel.send('Hi!')
-        }
-      }
-    } else {
-      const desc = await pc.createOffer()
-      await pc.setLocalDescription(desc)
-
-      console.log('SDP', pc.localDescription)
-
-      // send my SDP to the peer
-      FcmSvc.sendRtc('vladimir.g.osipov-at-gmail.com', {cmd: 'call', sdp: pc.localDescription})
-    }
-
-    store.bind([RTC_EXCHANGE], this.exchangeListener)
+  //  if (this.navParams.callRequest) {
+      // someone called you
+  //    this.exchangeListener(this.navParams.callRequest)
+  //  } else {
+      // you are calling to someone
+      // TODO: create PC for all the participants
+      this.createPC('vladimir.g.osipov-at-gmail.com', true)
+  //  }
   }
 
   componentWillUnmount() {
-    store.unbind([RTC_EXCHANGE], this.exchangeListener)
+    //store.unbind([RTC_EXCHANGE], this.exchangeListener)
+    this.dbRef.off('child_added', this.dbListener)
     this.leaveChat(false)
-  }
-
-  exchangeListener = async (data) => {
-    console.log('Accepting remote SDP')
-    await pc.setRemoteDescription(new RTCSessionDescription(data.sdp))
-
-    /*if (this.state.stream) {
-      pc.addStream(this.state.stream)
-    } else {
-      console.log('Local stream was not attached')
-    }*/
-    sendChannel.send('Hi!')
   }
 
   /**
@@ -156,6 +120,119 @@ export default class VideoScreen extends Component {
     }, e => console.log('ERR getUserMedia', e))
   }
 
+  createPC = (forId, isOffer) => {
+    const pc = new RTCPeerConnection(webRTCConfig)
+    let offered = false
+    let candidates = []
+    let candyWatch = null
+
+    pc.onicecandidate = (event) => {
+      console.log('SIGNAL icecandidate')
+
+      if (event.candidate) {
+
+      /*  if (candyWatch) clearTimeout(candyWatch)
+        candyWatch = setTimeout(() => {
+          console.log('Sending all candidates...')
+          const msg = this.dbRef.push({cmd: 'rtc-exchange', candidates, from: MY_ID, sessionId: $.sessionId})
+          msg.remove()
+          candidates = []
+        }, 1000)
+
+        if (event.candidate.candidate.includes(' udp ')) {
+          candidates.push(event.candidate)
+        }*/
+
+        const msg = this.dbRef.push({cmd: 'rtc-exchange', candidate: event.candidate, sessionId: $.sessionId, from: MY_ID})
+        msg.remove()
+      }
+    }
+
+    pc.onnegotiationneeded = () => {
+      console.log('SIGNAL negotiationneeded')
+      if (isOffer) {
+        offered = true
+        this.createOffer(forId).then(() => console.log('Offer created'))
+      }
+    }
+
+    pc.onaddstream = event => {
+      console.log('SIGNAL addstream')
+      let remoteStreams = this.state.remoteStreams
+      remoteStreams[forId] = event.stream
+      this.setState({ remoteStreams, inDaChat: true })
+    }
+
+    pc.ondatachannel = (event) => {
+      console.log('SIGNAL datachannel')
+      let receiveChannel = event.channel
+      receiveChannel.onmessage = (event) => {
+        console.log('>> ' + event.data)
+      }
+    }
+
+    //let sendChannel = pc.createDataChannel('sendDataChannel')
+
+    this.peers[forId] = pc
+
+    //sendChannel.send('Hi!')
+
+    if (this.state.stream) {
+      pc.addStream(this.state.stream)
+    } else {
+      console.log('Local stream was not attached')
+    }
+
+    //  if (!offered) {
+    offered = true
+    this.createOffer(forId)
+    //  }
+
+    return pc
+  }
+
+  createOffer = async (forId) => {
+    const pc = this.peers[forId]
+    const offer = await pc.createOffer()
+    await pc.setLocalDescription(offer)
+    console.log('Sending from createOffer()')
+    const msg = this.dbRef.push({cmd: 'rtc-exchange', sdp: pc.localDescription, sessionId: $.sessionId, from: MY_ID})
+    msg.remove()
+  }
+
+  exchange = async (data) => {
+    console.log('EVENT exchange', data)
+    const fromId = data.from
+    let pc = {}
+
+    if (this.peers[fromId]) {
+      pc = this.peers[fromId]
+    } else {
+      pc = this.createPC(fromId, false)
+    }
+
+    if (data.sdp) {
+      if (data.sdp.type === 'offer' && pc.signalingState !== 'have-local-offer') {
+        console.log('setRemoteDescription for offer')
+        await pc.setRemoteDescription(new RTCSessionDescription(data.sdp))
+        const answer = await pc.createAnswer()
+        await pc.setLocalDescription(answer)
+        const msg = this.dbRef.push({cmd: 'rtc-exchange', sdp: pc.localDescription, sessionId: $.sessionId, from: MY_ID})
+        msg.remove()
+      }
+      if (data.sdp.type === 'answer') {
+        pc.setRemoteDescription(new RTCSessionDescription(data.sdp))
+      }
+    }
+    else {
+      /*for (const c of data.candidates) {
+        console.log('Adding candidates...')
+        await pc.addIceCandidate(new RTCIceCandidate(c))
+      }*/
+      pc.addIceCandidate(new RTCIceCandidate(data.candidate))
+    }
+  }
+
   muteToggle = () => {
     if (this.state.stream.getAudioTracks()[0]) {
       const muted = !this.state.muted
@@ -172,14 +249,15 @@ export default class VideoScreen extends Component {
   }
 
   leaveChat = (goHome = false) => {
-
-    if (this.state.stream) {
-      this.state.stream.release()
+    const { stream } = this.state
+    // TODO: notify peers that you're out
+    for (const i in this.peers) {
+      this.peers[i].close()
     }
-
-    pc.close()
-
-    //  InCallManager.setForceSpeakerphoneOn(false)
+    if (stream) {
+      stream.release()
+    }
+  //  InCallManager.setForceSpeakerphoneOn(false)
   //  InCallManager.stop()
 
     if (goHome) {

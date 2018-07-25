@@ -77,6 +77,22 @@ export default class store {
   }
 
   /**
+   * Unbinds a listener from a keyset
+   *
+   * @param keys
+   * @param classRef
+   */
+  static unbind(keys, classRef) {
+    for (const key of keys) {
+      for (const i in listeners[key]) {
+        if (listeners[key][i] === classRef) {
+          delete listeners[key][i]
+        }
+      }
+    }
+  }
+
+  /**
    * Emits a specific message to the possible listeners
    *
    * @param key
