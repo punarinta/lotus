@@ -45,6 +45,15 @@
         </service>
         <service android:name="io.invertase.firebase.messaging.RNFirebaseBackgroundMessagingService" />
 
+        <!--
+        <receiver android:name="io.invertase.firebase.notifications.RNFirebaseBackgroundNotificationActionReceiver" android:exported="true">
+            <intent-filter>
+                <action android:name="io.invertase.firebase.notifications.BackgroundAction"/>
+            </intent-filter>
+        </receiver>
+        <service android:name="io.invertase.firebase.notifications.RNFirebaseBackgroundNotificationActionsService"/>
+        -->
+
         <meta-data
                 android:name="com.google.firebase.messaging.default_notification_icon"
                 android:resource="@drawable/ic_stat_ic_notification" />
