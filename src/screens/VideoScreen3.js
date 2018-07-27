@@ -253,6 +253,20 @@ export default class VideoScreen extends Component {
 
     if (data.candidates) {
       console.log('Adding candidates...')
+
+      setTimeout(() => {
+        console.log('FIRE', this.state.connState)
+        if (['failed','closed','disconnected','?'].includes(this.state.connState)) {
+          if (this.peers[peerId]) {
+            // reset the fukken flow
+            this.peers[peerId].close()
+            delete this.peers[peerId]
+          }
+          console.log('Retrying for ' + peerId)
+          this.createPC(peerId, true)
+        }
+      }, 5000)
+
       for (const c of data.candidates) {
         await pc.addIceCandidate(new RTCIceCandidate(c))
       }
