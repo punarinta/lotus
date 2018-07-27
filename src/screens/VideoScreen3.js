@@ -207,10 +207,14 @@ export default class VideoScreen extends Component {
     const pc = this.peers[peerId]
     if (!pc.offerSent) {
       const offer = await pc.createOffer()
-      await pc.setLocalDescription(offer)
-      console.log('Sending from createOffer()')
-      this.socket.emit(peerId, 'exchange', {sdp: offer})
-      pc.offerSent = true
+
+      try {
+        await pc.setLocalDescription(offer)
+        this.socket.emit(peerId, 'exchange', {sdp: offer})
+        pc.offerSent = true
+      } catch (e) {
+        console.log('pc.setLocalDescription(offer)')
+      }
     }
   }
 
@@ -220,13 +224,25 @@ export default class VideoScreen extends Component {
     const pc = this.peers[peerId] ? this.peers[peerId] : this.createPC(peerId, false)
 
     if (data.sdp && !pc.offerSent) {
-      await pc.setRemoteDescription(new RTCSessionDescription(data.sdp))
-      if (pc.remoteDescription.type === 'offer') {
-        //  if (pc.signalingState !== 'stable') {
-        const answer = await pc.createAnswer()
-        pc.setLocalDescription(answer)
-        this.socket.emit(peerId, 'exchange', { sdp: answer })
-        //  }
+
+      try {
+        await pc.setRemoteDescription(new RTCSessionDescription(data.sdp))
+
+        if (pc.remoteDescription.type === 'offer') {
+          //  if (pc.signalingState !== 'stable') {
+          const answer = await pc.createAnswer()
+
+          try {
+            await pc.setLocalDescription(answer)
+            this.socket.emit(peerId, 'exchange', { sdp: answer })
+          } catch (e) {
+            console.log('pc.setLocalDescription(answer)')
+          }
+
+          //  }
+        }
+      } catch (e) {
+        console.log('pc.setRemoteDescription(new ...)')
       }
     }
 
