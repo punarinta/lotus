@@ -52,6 +52,7 @@ export default class VideoScreen extends Component {
   async componentDidMount() {
 
     this.peers = {}
+    $.sessionId = Math.random()
 
     if (Platform.OS === 'ios' && InCallManager.recordPermission !== 'granted') {
       InCallManager.requestRecordPermission()
@@ -154,8 +155,7 @@ export default class VideoScreen extends Component {
     pc.oniceconnectionstatechange = () => {
       this.setState({connState: pc.iceConnectionState})
       console.log('SIGNAL oniceconnectionstatechange', pc.iceConnectionState)
-      this.peers[peerId].close()
-      delete this.peers[peerId]
+
       let remoteStreams = this.state.remoteStreams
       delete remoteStreams[peerId]
       this.setState({ remoteStreams, inDaChat: false })
