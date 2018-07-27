@@ -8,7 +8,7 @@ import I18n from 'i18n'
 import { PubSub } from 'services/pubsub'
 import EndCallSvg from 'components/svg/EndCall'
 
-const webRTCConfig = {'iceServers': [/*{'urls': 'stun:stun.services.mozilla.com'},*/ {'urls': 'stun:stun.l.google.com:19302'}]}
+const webRTCConfig = {'iceServers': [{'urls': 'stun:stun.services.mozilla.com'}, {'urls': 'stun:stun.l.google.com:19302'}]}
 
 const MY_ID = 'vladimir.g.osipov-at-gmail.com'
 
@@ -192,6 +192,22 @@ export default class VideoScreen extends Component {
       console.log('Local stream was not attached')
     }
 
+    const sendChannel = pc.createDataChannel('chat')
+  //  sendChannel.onopen = handleSendChannelStatusChange
+  //  sendChannel.onclose = handleSendChannelStatusChange
+    pc.ondatachannel = (event) => {
+      const receiveChannel = event.channel
+      receiveChannel.onmessage = (event) => {
+        console.log('REMOTE DATA', event.data)
+      }
+  //    receiveChannel.onopen = handleReceiveChannelStatusChange
+  //    receiveChannel.onclose = handleReceiveChannelStatusChange
+    }
+
+    setTimeout(() => {
+      sendChannel.send('Hello, world!')
+    }, 500)
+
     this.peers[peerId] = pc
 
     console.log('PC created with ' + peerId)
@@ -202,7 +218,7 @@ export default class VideoScreen extends Component {
   createOffer = async (peerId) => {
     const pc = this.peers[peerId]
     const offer = await pc.createOffer()
-    /*await*/ pc.setLocalDescription(offer)
+    pc.setLocalDescription(offer)
     this.socket.emit(peerId, 'exchange', {sdp: offer})
   }
 
@@ -214,11 +230,9 @@ export default class VideoScreen extends Component {
     if (data.sdp) {
       await pc.setRemoteDescription(new RTCSessionDescription(data.sdp))
       if (data.sdp.type === 'offer') {
-      //  if (pc.signalingState !== 'stable') {
-          const answer = await pc.createAnswer()
-          /*await*/ pc.setLocalDescription(answer)
-          this.socket.emit(peerId, 'exchange', {sdp: answer})
-      //  }
+        const answer = await pc.createAnswer()
+        pc.setLocalDescription(answer)
+        this.socket.emit(peerId, 'exchange', {sdp: answer})
       }
     }
 
@@ -238,7 +252,7 @@ export default class VideoScreen extends Component {
       }
 
       for (const c of data.candidates) {
-        /*await*/ pc.addIceCandidate(new RTCIceCandidate(c))
+        pc.addIceCandidate(new RTCIceCandidate(c))
       }
     }
   }
@@ -248,8 +262,10 @@ export default class VideoScreen extends Component {
     if (this.socket) {
       this.socket.close()
     }
-    // TODO: notify peers that you're out
     for (const i in this.peers) {
+      if (this.peers[i].watchdog) {
+        clearTimeout(this.peers[i].watchdog)
+      }
       this.peers[i].close()
     }
     if (stream) {
