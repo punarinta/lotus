@@ -1,18 +1,20 @@
 import React, { Component } from 'react'
-import { View, Text, StyleSheet, Platform, Dimensions } from 'react-native'
+import { View, Text, StyleSheet, Platform, Dimensions, TouchableOpacity } from 'react-native'
 import { RTCPeerConnection, RTCIceCandidate, RTCSessionDescription, RTCView, MediaStreamTrack, getUserMedia } from 'react-native-webrtc'
 import InCallManager from 'react-native-incall-manager'
 import { NavigationActions, StackActions } from 'react-navigation'
 import Theme from 'config/theme'
 import I18n from 'i18n'
-import { FcmSvc, RTC_EXCHANGE } from 'services/fcm'
-import { store } from 'core'
+import { PubSub } from 'services/pubsub'
+import EndCallSvg from 'components/svg/EndCall'
 
-const webRTCConfig = {'iceServers': [{'urls': 'stun:stun.l.google.com:19302'}]}
+const webRTCConfig = {'iceServers': [{'urls': 'stun:stun.services.mozilla.com'}, {'urls': 'stun:stun.l.google.com:19302'}]}
 
 const MY_ID = 'vladimir.g.osipov-at-gmail.com'
 
-export default class VideoScreen extends Component {
+export default class ChatScreen extends Component {
+
+  socket = null
 
   constructor(props) {
     super(props)
@@ -23,6 +25,7 @@ export default class VideoScreen extends Component {
       muted: false,
       isFront: true,
       inDaChat: false,
+      connState: '-',
     }
   }
 
@@ -30,15 +33,20 @@ export default class VideoScreen extends Component {
     return this.props.navigation.state && this.props.navigation.state.params ? this.props.navigation.state.params : {}
   }
 
-  exchangeListener = (data) => {
-    this.exchange(data)
-    // .then(() => console.log('socket.on: EXCHANGE'))
-      .catch(err => console.log('ERR exchangeListener', err))
+  initSocket = () => {
+    this.socket = new PubSub(false, '46.101.117.47', '/', 'ch-1337')// + this.navParams.peer)
+
+    this.socket.on('join', (remoteId) => {
+      this.createPC(remoteId, true)
+    })
+
+    this.socket.on('exchange', this.exchange)
   }
 
   async componentDidMount() {
 
     this.peers = {}
+    $.sessionId = Math.random()
 
     if (Platform.OS === 'ios' && InCallManager.recordPermission !== 'granted') {
       InCallManager.requestRecordPermission()
@@ -50,24 +58,21 @@ export default class VideoScreen extends Component {
         })
     }
 
-  /*  this.getLocalStream(stream => {
+    this.getLocalStream(stream => {
       this.setState({stream})
-    })*/
 
-    if (this.navParams.callRequest) {
-      // someone called you
-      this.exchangeListener(this.navParams.callRequest)
-    } else {
-      // you are calling to someone
-      // TODO: create PC for all the participants
-      this.createPC('vladimir.g.osipov-at-gmail.com', true)
-    }
+      if (!this.socket) {
+        this.initSocket()
+      }
 
-    store.bind([RTC_EXCHANGE], this.exchangeListener)
+      // tell everyone in da chat that:
+      // 1) you join
+      // 2) your ID is $.sessionId
+      this.socket.emit(null, 'join', $.sessionId)
+   })
   }
 
   componentWillUnmount() {
-    store.unbind([RTC_EXCHANGE], this.exchangeListener)
     this.leaveChat(false)
   }
 
@@ -109,23 +114,34 @@ export default class VideoScreen extends Component {
     }, e => console.log('ERR getUserMedia', e))
   }
 
-  createPC = (forId, isOffer) => {
+  addStreams = () => {
+    if (this.state.stream) {
+      for (const i in this.peers) {
+        this.peers[i].addStream(this.state.stream)
+      }
+    } else {
+      console.log('Local stream was not attached')
+    }
+  }
+
+  createPC = (peerId, isOffer) => {
     const pc = new RTCPeerConnection(webRTCConfig)
-    let offered = false
     let candidates = []
     let candyWatch = null
+    this.setState({connState: '?'})
+    pc.iWillRetry = isOffer
 
     pc.onicecandidate = (event) => {
-      // console.log('SIGNAL icecandidate')
+      console.log('SIGNAL icecandidate')
 
       if (event.candidate) {
 
         if (candyWatch) clearTimeout(candyWatch)
         candyWatch = setTimeout(() => {
           console.log('Sending all candidates...')
-          FcmSvc.sendRtc(forId, {cmd: 'rtc-exchange', candidates, from: MY_ID})
+          this.socket.emit(null, 'exchange', {candidates})
           candidates = []
-        }, 1000)
+        }, 750)
 
         if (event.candidate.candidate.includes(' udp ')) {
           candidates.push(event.candidate)
@@ -136,103 +152,101 @@ export default class VideoScreen extends Component {
     pc.onnegotiationneeded = () => {
       console.log('SIGNAL negotiationneeded')
       if (isOffer) {
-        offered = true
-        this.createOffer(forId).then(() => console.log('Offer created'))
+        this.createOffer(peerId).then(() => console.log('Offer created'))
+      }
+    }
+
+    pc.oniceconnectionstatechange = () => {
+      this.setState({connState: pc.iceConnectionState})
+      console.log('SIGNAL oniceconnectionstatechange', pc.iceConnectionState)
+      if (['failed','closed','disconnected'].includes(pc.iceConnectionState)) {
+      }
+      if (pc.iceConnectionState === 'connected') {
+        if (this.peers[peerId].watchdog) {
+          clearTimeout(this.peers[peerId].watchdog)
+        }
       }
     }
 
     pc.onaddstream = event => {
       console.log('SIGNAL addstream')
-    /*  let remoteStreams = this.state.remoteStreams
-      remoteStreams[forId] = event.stream
-      this.setState({ remoteStreams, inDaChat: true })*/
+      let remoteStreams = this.state.remoteStreams
+      remoteStreams[peerId] = event.stream
+      this.setState({ remoteStreams, inDaChat: true })
     }
 
-    pc.ondatachannel = (event) => {
-      console.log('SIGNAL datachannel')
-      let receiveChannel = event.channel
-      receiveChannel.onmessage = (event) => {
-        console.log('>> ' + event.data)
-      }
-    }
-
-    let sendChannel = pc.createDataChannel('sendDataChannel')
-
-    this.peers[forId] = pc
-
-    if (!offered) {
-      offered = true
-      this.createOffer(forId)
-    }
-
-    sendChannel.send('Hi!')
-
-  /*  if (this.state.stream) {
-      pc.addStream(this.state.stream)
+    if (this.state.stream) {
+      //pc.addStream(this.state.stream)
     } else {
       console.log('Local stream was not attached')
-    }*/
+    }
+
+    const channel = pc.createDataChannel('chat', {negotiated: true, id: 0})
+    channel.onopen = (event) =>{
+      channel.send('Hi you!')
+    }
+    channel.onmessage = (event) => {
+      console.log(event.data)
+    }
+
+    this.peers[peerId] = pc
+
+    console.log('PC created with ' + peerId)
 
     return pc
   }
 
-  createOffer = async (forId) => {
-    const pc = this.peers[forId]
-    const desc = await pc.createOffer()
-    await pc.setLocalDescription(desc)
-    console.log('Sending from createOffer()')
-    await FcmSvc.sendRtc(forId, {cmd: 'rtc-exchange', sdp: pc.localDescription, from: MY_ID})
+  createOffer = async (peerId) => {
+    const pc = this.peers[peerId]
+    const offer = await pc.createOffer()
+    pc.setLocalDescription(offer)
+    this.socket.emit(peerId, 'exchange', {sdp: offer})
   }
 
   exchange = async (data) => {
-    console.log('EVENT exchange')
-    const fromId = data.from
-    let pc = {}
-
-    if (this.peers[fromId]) {
-      pc = this.peers[fromId]
-    } else {
-      pc = this.createPC(fromId, false)
-    }
+    console.log('EVENT exchange', data)
+    const peerId = data.rtcFrom
+    const pc = this.peers[peerId] ? this.peers[peerId] : this.createPC(peerId, false)
 
     if (data.sdp) {
       await pc.setRemoteDescription(new RTCSessionDescription(data.sdp))
-      if (pc.remoteDescription.type === 'offer') {
-        if (pc.signalingState !== 'stable' /*&& pc.signalingState !== 'have-remote-offer'*/) {
-          const desc = await pc.createAnswer()
-          await pc.setLocalDescription(desc)
-          console.log('Sending from pc.signalingState !== stable')
-          await FcmSvc.sendRtc(fromId, {cmd: 'rtc-exchange', sdp: pc.localDescription, from: MY_ID})
-        }
+      if (data.sdp.type === 'offer') {
+        const answer = await pc.createAnswer()
+        pc.setLocalDescription(answer)
+        this.socket.emit(peerId, 'exchange', {sdp: answer})
       }
     }
-    else {
+
+    if (data.candidates) {
+      console.log('Adding candidates...')
+
+      if (!this.peers[peerId].watchdog) {
+        this.peers[peerId].watchdog = setTimeout(() => {
+          console.log('Watchdog fired for state ' + this.state.connState)
+          if (['failed','closed','disconnected','?'].includes(this.state.connState) && pc.iWillRetry) {
+            this.peers[peerId].close()
+            delete this.peers[peerId]
+            console.log('Retrying for peer ' + peerId)
+            this.createPC(peerId, true)
+          }
+        }, 5000)
+      }
+
       for (const c of data.candidates) {
-        console.log('Adding candidates...')
-        await pc.addIceCandidate(new RTCIceCandidate(c))
+        pc.addIceCandidate(new RTCIceCandidate(c))
       }
-    }
-  }
-
-  muteToggle = () => {
-    if (this.state.stream.getAudioTracks()[0]) {
-      const muted = !this.state.muted
-      this.state.stream.getAudioTracks()[0].enabled = !muted
-      this.setState({muted})
-    }
-  }
-
-  switchCam = () => {
-    if (this.state.stream.getVideoTracks()[0]) {
-      this.state.stream.getVideoTracks()[0]._switchCamera()
-      this.setState({isFront: !this.state.isFront})
     }
   }
 
   leaveChat = (goHome = false) => {
     const { stream } = this.state
-    // TODO: notify peers that you're out
+    if (this.socket) {
+      this.socket.close()
+    }
     for (const i in this.peers) {
+      if (this.peers[i].watchdog) {
+        clearTimeout(this.peers[i].watchdog)
+      }
       this.peers[i].close()
     }
     if (stream) {
@@ -262,7 +276,7 @@ export default class VideoScreen extends Component {
   }
 
   render() {
-
+    const svgSize = Theme.isTablet ? 48 : 24
     const { stream, remoteStreams } = this.state
 
     return (
@@ -273,15 +287,34 @@ export default class VideoScreen extends Component {
           }) : null
         }
         {
-          !this.state.inDaChat &&
+          this.state.inDaChat !== 'erwer' &&
           <View style={styles.overlay}>
             <View style={{backgroundColor: 'rgba(255,255,255,.5)', padding: 16, borderRadius: 16}}>
               <Text style={styles.statusText}>
                 { I18n.t('video.connecting') }
               </Text>
+              <Text style={styles.statusText}>
+                { this.state.connState }
+              </Text>
             </View>
           </View>
         }
+        <View style={styles.controlButtons}>
+          <TouchableOpacity
+            activeOpacity={0.8}
+            onPress={this.leaveChat}
+            style={[styles.controlButton, {backgroundColor: 'rgba(255,0,0,.7)'}]}
+          >
+            <EndCallSvg color="#fff" size={svgSize}/>
+          </TouchableOpacity>
+          <TouchableOpacity
+            activeOpacity={0.8}
+            onPress={this.addStreams}
+            style={[styles.controlButton, {backgroundColor: 'rgba(255,0,0,.7)'}]}
+          >
+            <EndCallSvg color="#fff" size={svgSize}/>
+          </TouchableOpacity>
+        </View>
         <View style={styles.selfViewWrapper}>
           {
             stream ? <RTCView streamURL={stream.toURL()} style={styles.selfView} /> : null
@@ -342,5 +375,24 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     zIndex: 10,
+  },
+  controlButtons: {
+    zIndex: 11,
+    position: 'absolute',
+    left: 0,
+    bottom: 0,
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255,255,255,.3)',
+  },
+  controlButton: {
+    width: Theme.isTablet ? 96 : 48,
+    height: Theme.isTablet ? 96 : 48,
+    marginHorizontal: Theme.isTablet ? 16 : 8,
+    marginVertical: 8,
+    borderRadius: Theme.isTablet ? 48 : 24,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 })

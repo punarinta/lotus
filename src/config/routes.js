@@ -1,6 +1,6 @@
 import SplashScreen from 'screens/SplashScreen'
 import HomeScreen from 'screens/HomeScreen'
-import VideoScreen from 'screens/VideoScreen3'
+import ChatScreen from 'screens/ChatScreen'
 
 import Theme from 'config/theme'
 
@@ -23,5 +23,5 @@ const navigationOptions = {header: null}
 export default {
   Splash: { screen: SplashScreen, navigationOptions },
   Home: { screen: HomeScreen, navigationOptions },
-  Video: { screen: VideoScreen, navigationOptions },
+  Chat: { screen: ChatScreen, navigationOptions },
 }

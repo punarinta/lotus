@@ -63,11 +63,11 @@ class PubSub {
     this.listeners[event] = callback
   }
 
-  async emit(to, event, payload) {
+  async emit(to, event, payload, wait = false) {
 
     const json = [to, $.sessionId, event, payload]
 
-    const cfg = {
+    let cfg = {
       headers: {
         'Accept': 'text/json'
       },
@@ -75,12 +75,17 @@ class PubSub {
       body: JSON.stringify(json)
     }
 
-    const request = await fetch((this.secure ? 'https' : 'http') + '://' + this.server + this.path + '/pub/' + this.channelId, cfg)
+    if (wait) {
+      const request = await fetch((this.secure ? 'https' : 'http') + '://' + this.server + this.path + '/pub/' + this.channelId, cfg)
 
-    if (!request.ok) {
-      console.log('ERROR (req.ok != true)', request.status, await request.text(), data )
+      if (!request.ok) {
+        console.log('ERROR (req.ok != true)', request.status, await request.text(), data )
+      }
     } else {
-      // console.log('OK', await request.json())
+      const controller = new AbortController()
+      cfg.signal = controller.signal
+      fetch((this.secure ? 'https' : 'http') + '://' + this.server + this.path + '/pub/' + this.channelId, cfg)
+      controller.abort()
     }
   }
 
