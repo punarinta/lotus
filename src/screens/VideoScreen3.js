@@ -206,11 +206,11 @@ export default class VideoScreen extends Component {
     const pc = this.peers[peerId]
     const offer = await pc.createOffer()
 
-    if (1 /*!nigDone[peerId] && 1pc.signalingState !== 'have-remote-offer'*/) {
+    if (!nigDone[peerId] /*&& pc.signalingState !== 'have-remote-offer'*/) {
       try {
         await pc.setLocalDescription(offer)
         this.socket.emit(peerId, 'exchange', {sdp: offer})
-    //    nigDone[peerId] = true
+        nigDone[peerId] = true
       } catch (e) {
         console.log('ERROR IN pc.setLocalDescription(offer)', e)
       }
@@ -222,7 +222,7 @@ export default class VideoScreen extends Component {
     const peerId = data.rtcFrom
     const pc = this.peers[peerId] ? this.peers[peerId] : this.createPC(peerId, false)
 
-    if (data.sdp && !nigDone[peerId]) {
+    if (data.sdp /*&& !nigDone[peerId]*/) {
 
       try {
 
@@ -230,7 +230,7 @@ export default class VideoScreen extends Component {
           await pc.setRemoteDescription(new RTCSessionDescription(data.sdp))
 
           if (pc.remoteDescription.type === 'offer') {
-            nigDone[peerId] = true
+          //  nigDone[peerId] = true
             //  if (pc.signalingState !== 'stable') {
             const answer = await pc.createAnswer()
 
