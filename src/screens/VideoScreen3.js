@@ -25,7 +25,7 @@ export default class VideoScreen extends Component {
       muted: false,
       isFront: true,
       inDaChat: false,
-      connState: '?',
+      connState: '-',
     }
   }
 
@@ -212,7 +212,7 @@ export default class VideoScreen extends Component {
     const pc = this.peers[peerId] ? this.peers[peerId] : this.createPC(peerId, false)
 
     if (data.sdp) {
-      /*await*/ pc.setRemoteDescription(new RTCSessionDescription(data.sdp))
+      await pc.setRemoteDescription(new RTCSessionDescription(data.sdp))
       if (data.sdp.type === 'offer') {
       //  if (pc.signalingState !== 'stable') {
           const answer = await pc.createAnswer()
@@ -225,10 +225,10 @@ export default class VideoScreen extends Component {
     if (data.candidates) {
       console.log('Adding candidates...')
 
-      if (!this.peers[peerId].watchdog && pc.iWillRetry) {
+      if (!this.peers[peerId].watchdog) {
         this.peers[peerId].watchdog = setTimeout(() => {
           console.log('Watchdog fired for state ' + this.state.connState)
-          if (['failed','closed','disconnected','?'].includes(this.state.connState)) {
+          if (['failed','closed','disconnected','?'].includes(this.state.connState) && pc.iWillRetry) {
             this.peers[peerId].close()
             delete this.peers[peerId]
             console.log('Retrying for peer ' + peerId)
