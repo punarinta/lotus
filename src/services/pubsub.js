@@ -26,15 +26,12 @@ class PubSub {
           return
         }
 
-        if (json[1] === null) {
-          // broadcasting
-          if (json[2] === $.sessionId) {
-            return
-          }
-        } else {
-          if (json[1] === $.sessionId) {
-            return
-          }
+        if (json[1] === $.sessionId) {
+          return
+        }
+
+        if (json[0] !== null && json[0] !== $.sessionId) {
+          return
         }
 
         if (this.listeners[json[0]]) {
