@@ -82,10 +82,11 @@ class PubSub {
         console.log('ERROR (req.ok != true)', request.status, await request.text(), data )
       }
     } else {
-      const controller = new AbortController()
-      cfg.signal = controller.signal
+      // TODO: add when supported by RN
+      // const controller = new AbortController()
+      // cfg.signal = controller.signal
       fetch((this.secure ? 'https' : 'http') + '://' + this.server + this.path + '/pub/' + this.channelId, cfg)
-      controller.abort()
+      // controller.abort()
     }
   }
 
