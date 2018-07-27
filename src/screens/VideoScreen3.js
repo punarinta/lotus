@@ -24,6 +24,7 @@ export default class VideoScreen extends Component {
       muted: false,
       isFront: true,
       inDaChat: false,
+      connState: '?',
     }
   }
 
@@ -172,6 +173,10 @@ export default class VideoScreen extends Component {
       }
     }
 
+    pc.oniceconnectionstatechange = () => {
+      this.setState({connState: pc.iceConnectionState})
+    }
+
     pc.onaddstream = event => {
       console.log('SIGNAL addstream')
       let remoteStreams = this.state.remoteStreams
@@ -306,6 +311,9 @@ export default class VideoScreen extends Component {
             <View style={{backgroundColor: 'rgba(255,255,255,.5)', padding: 16, borderRadius: 16}}>
               <Text style={styles.statusText}>
                 { I18n.t('video.connecting') }
+              </Text>
+              <Text style={styles.statusText}>
+                { this.state.connState }
               </Text>
             </View>
           </View>
