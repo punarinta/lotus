@@ -227,22 +227,26 @@ export default class VideoScreen extends Component {
 
       try {
 
-        if (pc.signalingState !== 'have-local-offer') await pc.setRemoteDescription(new RTCSessionDescription(data.sdp))
+        if (pc.signalingState !== 'have-local-offer') {
+          await pc.setRemoteDescription(new RTCSessionDescription(data.sdp))
 
-        if (pc.remoteDescription.type === 'offer') {
-          pc.offer = true
-          //  if (pc.signalingState !== 'stable') {
-          const answer = await pc.createAnswer()
+          if (pc.remoteDescription.type === 'offer') {
+            pc.offer = true
+            //  if (pc.signalingState !== 'stable') {
+            const answer = await pc.createAnswer()
 
-          try {
-            await pc.setLocalDescription(answer)
-            this.socket.emit(peerId, 'exchange', { sdp: answer })
-          } catch (e) {
-            console.log('ERROR IN pc.setLocalDescription(answer)', e)
+            try {
+              await pc.setLocalDescription(answer)
+              this.socket.emit(peerId, 'exchange', { sdp: answer })
+            } catch (e) {
+              console.log('ERROR IN pc.setLocalDescription(answer)', e)
+            }
+
+            //  }
           }
-
-          //  }
         }
+
+
       } catch (e) {
         console.log('ERROR IN pc.setRemoteDescription(new ...)', e)
       }
