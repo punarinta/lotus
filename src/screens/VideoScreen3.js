@@ -8,7 +8,8 @@ import I18n from 'i18n'
 import { PubSub } from 'services/pubsub'
 import EndCallSvg from 'components/svg/EndCall'
 
-const webRTCConfig = {'iceServers': [{'urls': 'stun:stun.services.mozilla.com'}, {'urls': 'stun:stun.l.google.com:19302'}]}
+//const webRTCConfig = {'iceServers': [{'urls': 'stun:stun.services.mozilla.com'}, {'urls': 'stun:stun.l.google.com:19302'}]}
+const webRTCConfig = {'iceServers': [{'urls': 'turn:46.101.117.47:3478'}]}
 
 const MY_ID = 'vladimir.g.osipov-at-gmail.com'
 
