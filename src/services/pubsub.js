@@ -17,23 +17,23 @@ class PubSub {
     }
 
     ws.onmessage = (e) => {
-      console.log('Incoming msg:', e.data)
+      //console.log('Incoming msg:', e.data)
 
       try {
         let json = JSON.parse(e.data)
 
         if (!Array.isArray(json) || json.length !== 4) {
-          console.log('Wrong format')
+          //console.log('Wrong format')
           return
         }
 
         if (json[1] === $.sessionId) {
-          console.log('Message from myself')
+          //console.log('Message from myself')
           return
         }
 
         if (json[0] !== null && json[0] !== $.sessionId) {
-          console.log('Message to someone else')
+          //console.log('Message to someone else')
           return
         }
 

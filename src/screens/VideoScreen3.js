@@ -175,6 +175,7 @@ export default class VideoScreen extends Component {
 
     pc.oniceconnectionstatechange = () => {
       this.setState({connState: pc.iceConnectionState})
+      console.log('SIGNAL oniceconnectionstatechange', pc.iceConnectionState)
     }
 
     pc.onaddstream = event => {
@@ -192,7 +193,7 @@ export default class VideoScreen extends Component {
       console.log('Local stream was not attached')
     }
 
-    console.log('PC created')
+    console.log('PC created with ' + forId)
 
     if (isOffer) {
       await this.createOffer(forId)
