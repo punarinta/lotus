@@ -206,11 +206,11 @@ export default class VideoScreen extends Component {
     const pc = this.peers[peerId]
     const offer = await pc.createOffer()
 
-    if (!nigDone[peerId] /*&& 1pc.signalingState !== 'have-remote-offer'*/) {
+    if (1 /*!nigDone[peerId] && 1pc.signalingState !== 'have-remote-offer'*/) {
       try {
         await pc.setLocalDescription(offer)
         this.socket.emit(peerId, 'exchange', {sdp: offer})
-        nigDone[peerId] = true
+    //    nigDone[peerId] = true
       } catch (e) {
         console.log('ERROR IN pc.setLocalDescription(offer)', e)
       }
