@@ -154,7 +154,11 @@ export default class VideoScreen extends Component {
     pc.oniceconnectionstatechange = () => {
       this.setState({connState: pc.iceConnectionState})
       console.log('SIGNAL oniceconnectionstatechange', pc.iceConnectionState)
-      // TODO: if 'disconnected' take action
+      this.peers[peerId].close()
+      delete this.peers[peerId]
+      let remoteStreams = this.state.remoteStreams
+      delete remoteStreams[peerId]
+      this.setState({ remoteStreams, inDaChat: false })
     }
 
     pc.onaddstream = event => {
@@ -174,10 +178,6 @@ export default class VideoScreen extends Component {
 
     console.log('PC created with ' + peerId)
 
-    //if (isOffer) {
-    //  this.createOffer(peerId)
-    //}
-
     return pc
   }
 
@@ -195,14 +195,12 @@ export default class VideoScreen extends Component {
     const pc = this.peers[peerId] ? this.peers[peerId] : this.createPC(peerId, false)
 
     if (data.sdp) {
-      if (pc.signalingState !== 'have-local-offer') {
-        await pc.setRemoteDescription(new RTCSessionDescription(data.sdp))
-        if (data.sdp.type === 'offer') {
-          if (pc.signalingState !== 'stable' && pc.signalingState !== 'have-remote-offer') {
-            const desc = await pc.createAnswer()
-            pc.setLocalDescription(desc)
-            this.socket.emit(peerId, 'exchange', { sdp: desc })
-          }
+      await pc.setRemoteDescription(new RTCSessionDescription(data.sdp))
+      if (data.sdp.type === 'offer') {
+        if (pc.signalingState !== 'stable') {
+          const desc = await pc.createAnswer()
+          pc.setLocalDescription(desc)
+          this.socket.emit(peerId, 'exchange', { sdp: desc })
         }
       }
     }
