@@ -265,7 +265,7 @@ export default class VideoScreen extends Component {
           console.log('Retrying for ' + peerId)
           this.createPC(peerId, true)
         }
-      }, 5000)
+      }, 4000 + 2000 * Math.random())
 
       for (const c of data.candidates) {
         await pc.addIceCandidate(new RTCIceCandidate(c))
