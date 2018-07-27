@@ -130,6 +130,7 @@ export default class VideoScreen extends Component {
     const pc = new RTCPeerConnection(webRTCConfig)
     let candidates = []
     let candyWatch = null
+    this.setState({connState: '?'})
 
     pc.onicecandidate = (event) => {
       console.log('SIGNAL icecandidate')
@@ -223,18 +224,17 @@ export default class VideoScreen extends Component {
     if (data.candidates) {
       console.log('Adding candidates...')
 
-      this.peers[peerId].watchdog = setTimeout(() => {
-        console.log('Watchdog fired for state ' + this.state.connState)
-        if (['failed','closed','disconnected','?'].includes(this.state.connState)) {
-          if (this.peers[peerId]) {
-            // reset the fukken flow
+      if (!this.peers[peerId].watchdog) {
+        this.peers[peerId].watchdog = setTimeout(() => {
+          console.log('Watchdog fired for state ' + this.state.connState)
+          if (['failed','closed','disconnected','?'].includes(this.state.connState)) {
             this.peers[peerId].close()
             delete this.peers[peerId]
+            console.log('Retrying for peer ' + peerId)
+            this.createPC(peerId, true)
           }
-          console.log('Retrying for peer ' + peerId)
-          this.createPC(peerId, true)
-        }
-      }, 5000 + 3000 * Math.random())
+        }, 4000 + 2000 * Math.random())
+      }
 
       for (const c of data.candidates) {
         await pc.addIceCandidate(new RTCIceCandidate(c))
