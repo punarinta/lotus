@@ -202,10 +202,8 @@ export default class VideoScreen extends Component {
   createOffer = async (peerId) => {
     const pc = this.peers[peerId]
     const offer = await pc.createOffer()
-  //  setTimeout(async () => {
-      await pc.setLocalDescription(offer)
-      this.socket.emit(peerId, 'exchange', {sdp: offer})
-  //  }, 250)
+    /*await*/ pc.setLocalDescription(offer)
+    this.socket.emit(peerId, 'exchange', {sdp: offer})
   }
 
   exchange = async (data) => {
@@ -214,16 +212,14 @@ export default class VideoScreen extends Component {
     const pc = this.peers[peerId] ? this.peers[peerId] : this.createPC(peerId, false)
 
     if (data.sdp) {
-    //  setTimeout(async () => {
-        await pc.setRemoteDescription(new RTCSessionDescription(data.sdp))
-        if (pc.remoteDescription.type === 'offer') {
-          if (pc.signalingState !== 'stable') {
-            const answer = await pc.createAnswer()
-            await pc.setLocalDescription(answer)
-            this.socket.emit(peerId, 'exchange', {sdp: answer})
-          }
-        }
-    //  }, 500)
+      /*await*/ pc.setRemoteDescription(new RTCSessionDescription(data.sdp))
+      if (pc.remoteDescription.type === 'offer') {
+      //  if (pc.signalingState !== 'stable') {
+          const answer = await pc.createAnswer()
+          /*await*/ pc.setLocalDescription(answer)
+          this.socket.emit(peerId, 'exchange', {sdp: answer})
+      //  }
+      }
     }
 
     if (data.candidates) {
@@ -236,15 +232,13 @@ export default class VideoScreen extends Component {
             this.peers[peerId].close()
             delete this.peers[peerId]
             console.log('Retrying for peer ' + peerId)
-          //  $.sessionId = Math.random()
-          //  this.socket.emit(null, 'join', $.sessionId)
             this.createPC(peerId, true)
           }
-        }, 4000 + 2000 * Math.random())
+        }, 5000)
       }
 
       for (const c of data.candidates) {
-        await pc.addIceCandidate(new RTCIceCandidate(c))
+        /*await*/ pc.addIceCandidate(new RTCIceCandidate(c))
       }
     }
   }
