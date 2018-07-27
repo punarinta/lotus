@@ -155,7 +155,7 @@ export default class VideoScreen extends Component {
     pc.oniceconnectionstatechange = () => {
       this.setState({connState: pc.iceConnectionState})
       console.log('SIGNAL oniceconnectionstatechange', pc.iceConnectionState)
-      if (pc.iceConnectionState === 'disconnected') {
+      /*if (pc.iceConnectionState === 'disconnected') {
         pc.close()
         if (this.peers[peerId]) {
           delete this.peers[peerId]
@@ -163,7 +163,7 @@ export default class VideoScreen extends Component {
         let remoteStreams = this.state.remoteStreams
         delete remoteStreams[peerId]
         this.setState({ remoteStreams, inDaChat: false })
-      }
+      }*/
     }
 
     pc.onaddstream = event => {
@@ -211,8 +211,8 @@ export default class VideoScreen extends Component {
     }
     else {
       //await pc.addIceCandidate(new RTCIceCandidate(data.candidate))
+      console.log('Adding candidates...')
       for (const c of data.candidates) {
-        console.log('Adding candidates...')
         await pc.addIceCandidate(new RTCIceCandidate(c))
       }
     }
