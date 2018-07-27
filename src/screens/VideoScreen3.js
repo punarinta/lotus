@@ -187,26 +187,18 @@ export default class VideoScreen extends Component {
     }
 
     if (this.state.stream) {
-      pc.addStream(this.state.stream)
+      //pc.addStream(this.state.stream)
     } else {
       console.log('Local stream was not attached')
     }
 
-    const sendChannel = pc.createDataChannel('chat')
-  //  sendChannel.onopen = handleSendChannelStatusChange
-  //  sendChannel.onclose = handleSendChannelStatusChange
-    pc.ondatachannel = (event) => {
-      const receiveChannel = event.channel
-      receiveChannel.onmessage = (event) => {
-        console.log('REMOTE DATA', event.data)
-      }
-  //    receiveChannel.onopen = handleReceiveChannelStatusChange
-  //    receiveChannel.onclose = handleReceiveChannelStatusChange
+    const channel = pc.createDataChannel("chat")
+    channel.onopen = (event) =>{
+      channel.send('Hi you!')
     }
-
-    setTimeout(() => {
-      sendChannel.send('Hello, world!')
-    }, 500)
+    channel.onmessage = (event) => {
+      console.log(event.data)
+    }
 
     this.peers[peerId] = pc
 
