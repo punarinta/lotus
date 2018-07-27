@@ -159,8 +159,8 @@ export default class VideoScreen extends Component {
 
     pc.onnegotiationneeded = () => {
       console.log('SIGNAL negotiationneeded')
-      if (isOffer && !nigDone[peerId]) {
-        nigDone[peerId] = true
+      if (isOffer /*&& !nigDone[peerId]*/) {
+        //nigDone[peerId] = true
         this.createOffer(peerId).then(() => console.log('Offer created'))
       }
     }
@@ -205,11 +205,13 @@ export default class VideoScreen extends Component {
 
   createOffer = async (peerId) => {
     const pc = this.peers[peerId]
-    const offer = await pc.createOffer()
-    await pc.setLocalDescription(offer)
-    console.log('Sending from createOffer()')
-    this.socket.emit(peerId, 'exchange', {sdp: offer})
-    pc.offerSent = true
+    if (!pc.offerSent) {
+      const offer = await pc.createOffer()
+      await pc.setLocalDescription(offer)
+      console.log('Sending from createOffer()')
+      this.socket.emit(peerId, 'exchange', {sdp: offer})
+      pc.offerSent = true
+    }
   }
 
   exchange = async (data) => {
@@ -217,17 +219,18 @@ export default class VideoScreen extends Component {
     const peerId = data.rtcFrom
     const pc = this.peers[peerId] ? this.peers[peerId] : this.createPC(peerId, false)
 
-    if (data.sdp) {
+    if (data.sdp && !pc.offerSent) {
       await pc.setRemoteDescription(new RTCSessionDescription(data.sdp))
-      if (pc.remoteDescription.type === 'offer' /*&& !pc.offerSent*/) {
-      //  if (pc.signalingState !== 'stable') {
-          const answer = await pc.createAnswer()
-          pc.setLocalDescription(answer)
-          this.socket.emit(peerId, 'exchange', { sdp: answer })
-      //  }
+      if (pc.remoteDescription.type === 'offer') {
+        //  if (pc.signalingState !== 'stable') {
+        const answer = await pc.createAnswer()
+        pc.setLocalDescription(answer)
+        this.socket.emit(peerId, 'exchange', { sdp: answer })
+        //  }
       }
     }
-    else {
+
+    if (data.candidates) {
       console.log('Adding candidates...')
       for (const c of data.candidates) {
         await pc.addIceCandidate(new RTCIceCandidate(c))
@@ -244,6 +247,7 @@ export default class VideoScreen extends Component {
     // TODO: notify peers that you're out
     for (const i in this.peers) {
       this.peers[i].close()
+      this.peers[i].offerSent = false
     }
     if (stream) {
       stream.release()
