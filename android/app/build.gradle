@@ -154,6 +154,7 @@ android {
 }
 
 dependencies {
+    compile project(':react-native-svg')
     implementation project(':react-native-firebase')
     compile project(':react-native-incall-manager')
     compile fileTree(dir: "libs", include: ["*.jar"])
