@@ -168,7 +168,7 @@ export default class VideoScreen extends Component {
     pc.oniceconnectionstatechange = () => {
       this.setState({connState: pc.iceConnectionState})
       console.log('SIGNAL oniceconnectionstatechange', pc.iceConnectionState)
-      if (['failed','closed'].includes(pc.iceConnectionState)) {
+      if (['failed','closed','disconnected'].includes(pc.iceConnectionState)) {
         pc.offerSent = false
         nigDone[peerId] = false
       }
@@ -219,12 +219,12 @@ export default class VideoScreen extends Component {
 
     if (data.sdp) {
       await pc.setRemoteDescription(new RTCSessionDescription(data.sdp))
-      if (data.sdp.type === 'offer' /*&& !pc.offerSent*/) {
-        if (pc.signalingState !== 'stable') {
+      if (pc.remoteDescription.type === 'offer' /*&& !pc.offerSent*/) {
+      //  if (pc.signalingState !== 'stable') {
           const answer = await pc.createAnswer()
           pc.setLocalDescription(answer)
           this.socket.emit(peerId, 'exchange', { sdp: answer })
-        }
+      //  }
       }
     }
     else {
@@ -236,7 +236,7 @@ export default class VideoScreen extends Component {
   }
 
   leaveChat = (goHome = false) => {
-    nigDone = {};
+    nigDone = {}
     const { stream } = this.state
     if (this.socket) {
       this.socket.close()
