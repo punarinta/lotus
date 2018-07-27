@@ -173,9 +173,9 @@ export default class VideoScreen extends Component {
 
     console.log('PC created with ' + peerId)
 
-    if (isOffer) {
-      this.createOffer(peerId)
-    }
+    //if (isOffer) {
+    //  this.createOffer(peerId)
+    //}
 
     return pc
   }
@@ -205,21 +205,6 @@ export default class VideoScreen extends Component {
     }
     else {
       await pc.addIceCandidate(new RTCIceCandidate(data.candidate))
-    }
-  }
-
-  muteToggle = () => {
-    if (this.state.stream.getAudioTracks()[0]) {
-      const muted = !this.state.muted
-      this.state.stream.getAudioTracks()[0].enabled = !muted
-      this.setState({muted})
-    }
-  }
-
-  switchCam = () => {
-    if (this.state.stream.getVideoTracks()[0]) {
-      this.state.stream.getVideoTracks()[0]._switchCamera()
-      this.setState({isFront: !this.state.isFront})
     }
   }
 
@@ -270,7 +255,7 @@ export default class VideoScreen extends Component {
           }) : null
         }
         {
-          !this.state.inDaChat &&
+          this.state.inDaChat !== 'erwer' &&
           <View style={styles.overlay}>
             <View style={{backgroundColor: 'rgba(255,255,255,.5)', padding: 16, borderRadius: 16}}>
               <Text style={styles.statusText}>
