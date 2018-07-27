@@ -5,15 +5,15 @@ import InCallManager from 'react-native-incall-manager'
 import { NavigationActions, StackActions } from 'react-navigation'
 import Theme from 'config/theme'
 import I18n from 'i18n'
-import { FcmSvc, RTC_EXCHANGE } from 'services/fcm'
-import { store } from 'core'
-import firebase from 'react-native-firebase'
+import { PubSub } from 'services/pubsub'
 
 const webRTCConfig = {'iceServers': [{'urls': 'stun:stun.services.mozilla.com'}, {'urls': 'stun:stun.l.google.com:19302'}]}
 
 const MY_ID = 'vladimir.g.osipov-at-gmail.com'
 
 export default class VideoScreen extends Component {
+
+  socket = null
 
   constructor(props) {
     super(props)
@@ -31,24 +31,45 @@ export default class VideoScreen extends Component {
     return this.props.navigation.state && this.props.navigation.state.params ? this.props.navigation.state.params : {}
   }
 
-  dbListener = (incoming) => {
-    const data = incoming.val()
-    if (data.sessionId === $.sessionId) {
-      return
-    }
+  initSocket = () => {
+    this.socket = new PubSub(false, '46.101.117.47', '/', 'ch-1337')// + this.navParams.peer)
 
-    if (data.cmd === 'rtc-exchange') {
+    this.socket.on('join', (remoteId) => {
+      // someone tells yo (or everyone) that he joins
+      // create a PC with him
+      this.createPC(remoteId, true)
+    })
+
+    this.socket.on('exchange', (data) => {
       this.exchange(data)
-      //  .then(() => console.log('socket.on: EXCHANGE'))
-      //  .catch(err => console.log('ERR exchangeListener', err))
-    }
+      // .then(() => console.log('socket.on: EXCHANGE'))
+        .catch(err => console.log('ERR', err))
+    })
+
+    this.socket.on('leave-room', (id) => {
+      if (id !== this.socket.id) {
+        this.setState(prevState => {
+          const newStreams = prevState.remoteStreams
+
+          if (this.peers[id]) {
+            this.peers[id].close()
+            delete this.peers[id]
+          }
+
+          delete newStreams[id]
+          return {
+            ...prevState,
+            remoteStreams: newStreams,
+          }
+        })
+
+        console.log(`User ${id} left the room`)
+        this.leaveChat(true)
+      }
+    })
   }
 
   async componentDidMount() {
-
-    this.dbRef = firebase.database().ref('vladimir-dot-g-dot-osipov-at-gmail-dot-com')
-
-    this.dbRef.on('child_added', this.dbListener)
 
     this.peers = {}
 
@@ -62,22 +83,22 @@ export default class VideoScreen extends Component {
         })
     }
 
-    this.getLocalStream(stream => {
-      this.setState({stream})
-    })
+  //  this.getLocalStream(stream => {
+  //    this.setState({stream})
 
-  //  if (this.navParams.callRequest) {
-      // someone called you
-  //    this.exchangeListener(this.navParams.callRequest)
-  //  } else {
-      // you are calling to someone
-      // TODO: create PC for all the participants
-      this.createPC('vladimir.g.osipov-at-gmail.com', true)
-  //  }
+      if (!this.socket) {
+        this.initSocket()
+      }
+
+      // tell everyone in da chat that:
+      // 1) you join
+      // 2) your ID is $.sessionId
+      this.socket.emit(null, 'join', $.sessionId)
+
+  // })
   }
 
   componentWillUnmount() {
-    this.dbRef.off('child_added', this.dbListener)
     this.leaveChat(false)
   }
 
@@ -121,7 +142,6 @@ export default class VideoScreen extends Component {
 
   createPC = (forId, isOffer) => {
     const pc = new RTCPeerConnection(webRTCConfig)
-    let offered = false
     let candidates = []
     let candyWatch = null
 
@@ -133,8 +153,7 @@ export default class VideoScreen extends Component {
       /*  if (candyWatch) clearTimeout(candyWatch)
         candyWatch = setTimeout(() => {
           console.log('Sending all candidates...')
-          const msg = this.dbRef.push({cmd: 'rtc-exchange', candidates, from: MY_ID, sessionId: $.sessionId})
-          msg.remove()
+          this.socket.emit(null, 'exchange', {candidates})
           candidates = []
         }, 1000)
 
@@ -142,15 +161,13 @@ export default class VideoScreen extends Component {
           candidates.push(event.candidate)
         }*/
 
-        const msg = this.dbRef.push({cmd: 'rtc-exchange', candidate: event.candidate, sessionId: $.sessionId, from: MY_ID})
-        msg.remove()
+        this.socket.emit(null, 'exchange', {candidate: event.candidate})
       }
     }
 
     pc.onnegotiationneeded = () => {
       console.log('SIGNAL negotiationneeded')
       if (isOffer) {
-        offered = true
         this.createOffer(forId).then(() => console.log('Offer created'))
       }
     }
@@ -162,30 +179,13 @@ export default class VideoScreen extends Component {
       this.setState({ remoteStreams, inDaChat: true })
     }
 
-    pc.ondatachannel = (event) => {
-      console.log('SIGNAL datachannel')
-      let receiveChannel = event.channel
-      receiveChannel.onmessage = (event) => {
-        console.log('>> ' + event.data)
-      }
-    }
-
-    //let sendChannel = pc.createDataChannel('sendDataChannel')
-
     this.peers[forId] = pc
-
-    //sendChannel.send('Hi!')
 
     if (this.state.stream) {
       pc.addStream(this.state.stream)
     } else {
       console.log('Local stream was not attached')
     }
-
-    //  if (!offered) {
-    offered = true
-    this.createOffer(forId)
-    //  }
 
     return pc
   }
@@ -195,8 +195,8 @@ export default class VideoScreen extends Component {
     const offer = await pc.createOffer()
     await pc.setLocalDescription(offer)
     console.log('Sending from createOffer()')
-    const msg = this.dbRef.push({cmd: 'rtc-exchange', sdp: pc.localDescription, sessionId: $.sessionId, from: MY_ID})
-    msg.remove()
+    //const msg = this.dbRef.push({cmd: 'rtc-exchange', sdp: pc.localDescription, sessionId: $.sessionId, from: MY_ID})
+    //msg.remove()
   }
 
   exchange = async (data) => {
@@ -251,6 +251,9 @@ export default class VideoScreen extends Component {
 
   leaveChat = (goHome = false) => {
     const { stream } = this.state
+    if (this.socket) {
+      this.socket.close()
+    }
     // TODO: notify peers that you're out
     for (const i in this.peers) {
       this.peers[i].close()

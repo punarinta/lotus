@@ -22,13 +22,13 @@ export default class HomeScreen extends Component {
       <View>
         <Text>Hello</Text>
         <Button
-          title="Video"
-          onPress={() => $.navigator.navigate('Video')}
+          title="Video 1"
+          onPress={() => $.navigator.navigate('Video', {peer: 1})}
         />
-
-        <Button title="FCM message only" onPress={() => FcmSvc.send('vladimir.g.osipov-at-gmail.com', 'Hello message!', 'Title') } />
-        <Button title="FCM data only" onPress={() => FcmSvc.send('vladimir.g.osipov-at-gmail.com', null, null, {aaa:'bbb'}) } />
-        <Button title="Full FCM" onPress={() => FcmSvc.send('vladimir.g.osipov-at-gmail.com', 'Hello message!', 'Title', {aaa:'bbb'}) } />
+        <Button
+          title="Video 2"
+          onPress={() => $.navigator.navigate('Video', {peer: 2})}
+        />
       </View>
     )
   }
