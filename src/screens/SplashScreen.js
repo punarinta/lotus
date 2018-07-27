@@ -7,6 +7,7 @@ import I18n from 'i18n'
 import { SysSvc } from 'services/sys'
 import { FcmSvc } from 'services/fcm'
 import firebase from 'react-native-firebase'
+import InCallManager from 'react-native-incall-manager'
 
 export default class SplashScreen extends Component {
   static propTypes = {
@@ -80,6 +81,8 @@ export default class SplashScreen extends Component {
     }
 
     firebase.messaging().subscribeToTopic('topic-vladimir.g.osipov-at-gmail.com')
+
+    InCallManager.setKeepScreenOn(true)
 
     this.setState({hydrated: true})
   }

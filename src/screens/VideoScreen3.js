@@ -130,7 +130,7 @@ export default class VideoScreen extends Component {
 
       if (event.candidate) {
 
-      /*  if (candyWatch) clearTimeout(candyWatch)
+        if (candyWatch) clearTimeout(candyWatch)
         candyWatch = setTimeout(() => {
           console.log('Sending all candidates...')
           this.socket.emit(null, 'exchange', {candidates})
@@ -139,9 +139,9 @@ export default class VideoScreen extends Component {
 
         if (event.candidate.candidate.includes(' udp ')) {
           candidates.push(event.candidate)
-        }*/
+        }
 
-        this.socket.emit(null, 'exchange', {candidate: event.candidate})
+        //this.socket.emit(null, 'exchange', {candidate: event.candidate})
       }
     }
 
@@ -156,6 +156,10 @@ export default class VideoScreen extends Component {
       this.setState({connState: pc.iceConnectionState})
       console.log('SIGNAL oniceconnectionstatechange', pc.iceConnectionState)
       if (pc.iceConnectionState === 'disconnected') {
+        pc.close()
+        if (this.peers[peerId]) {
+          delete this.peers[peerId]
+        }
         let remoteStreams = this.state.remoteStreams
         delete remoteStreams[peerId]
         this.setState({ remoteStreams, inDaChat: false })
@@ -206,7 +210,11 @@ export default class VideoScreen extends Component {
       }
     }
     else {
-      await pc.addIceCandidate(new RTCIceCandidate(data.candidate))
+      //await pc.addIceCandidate(new RTCIceCandidate(data.candidate))
+      for (const c of data.candidates) {
+        console.log('Adding candidates...')
+        await pc.addIceCandidate(new RTCIceCandidate(c))
+      }
     }
   }
 
