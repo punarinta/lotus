@@ -137,7 +137,7 @@ export default class VideoScreen extends Component {
     let candidates = []
     let candyWatch = null
 
-    pc.offer = false
+    nigDone[peerId] = false
 
     pc.onicecandidate = (event) => {
       console.log('SIGNAL icecandidate')
@@ -151,9 +151,9 @@ export default class VideoScreen extends Component {
           candidates = []
         }, 1000)
 
-        if (event.candidate.candidate.includes(' udp ')) {
-          candidates.push(event.candidate)
-        }
+      //  if (event.candidate.candidate.includes(' udp ')) {
+      //    candidates.push(event.candidate)
+      //  }
       }
     }
 
@@ -169,7 +169,6 @@ export default class VideoScreen extends Component {
       this.setState({connState: pc.iceConnectionState})
       console.log('SIGNAL oniceconnectionstatechange', pc.iceConnectionState)
       if (['failed','closed','disconnected'].includes(pc.iceConnectionState)) {
-        pc.offer = false
         nigDone[peerId] = false
       }
       /*if (pc.iceConnectionState === 'disconnected') {
@@ -207,11 +206,11 @@ export default class VideoScreen extends Component {
     const pc = this.peers[peerId]
     const offer = await pc.createOffer()
 
-    if (!pc.offer && pc.signalingState !== 'have-remote-offer') {
+    if (!nigDone[peerId] /*&& 1pc.signalingState !== 'have-remote-offer'*/) {
       try {
         await pc.setLocalDescription(offer)
         this.socket.emit(peerId, 'exchange', {sdp: offer})
-        this.peers[peerId].offer = true
+        nigDone[peerId] = true
       } catch (e) {
         console.log('ERROR IN pc.setLocalDescription(offer)', e)
       }
@@ -223,15 +222,15 @@ export default class VideoScreen extends Component {
     const peerId = data.rtcFrom
     const pc = this.peers[peerId] ? this.peers[peerId] : this.createPC(peerId, false)
 
-    if (data.sdp && !pc.offer) {
+    if (data.sdp && !nigDone[peerId]) {
 
       try {
 
-        if (pc.signalingState !== 'have-local-offer') {
+        if (1/*pc.signalingState !== 'have-local-offer'*/) {
           await pc.setRemoteDescription(new RTCSessionDescription(data.sdp))
 
           if (pc.remoteDescription.type === 'offer') {
-            pc.offer = true
+            nigDone[peerId] = true
             //  if (pc.signalingState !== 'stable') {
             const answer = await pc.createAnswer()
 
@@ -269,7 +268,6 @@ export default class VideoScreen extends Component {
     // TODO: notify peers that you're out
     for (const i in this.peers) {
       this.peers[i].close()
-      this.peers[i].offer = false
     }
     if (stream) {
       stream.release()
