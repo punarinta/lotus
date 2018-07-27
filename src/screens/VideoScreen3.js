@@ -222,6 +222,22 @@ export default class VideoScreen extends Component {
     }
 
     if (data.sdp) {
+      await pc.setRemoteDescription(new RTCSessionDescription(data.sdp))
+      if (pc.remoteDescription.type === 'offer') {
+        if (pc.signalingState !== 'stable') {
+          const desc = await pc.createAnswer()
+          await pc.setLocalDescription(desc)
+          this.socket.emit(fromId, 'exchange', { sdp: pc.localDescription })
+        }
+      }
+    }
+    else {
+      await pc.addIceCandidate(new RTCIceCandidate(data.candidate))
+    }
+
+    return
+
+    if (data.sdp) {
       if (data.sdp.type === 'offer' /*&& pc.signalingState !== 'have-local-offer'*/) {
         console.log('setRemoteDescription for offer')
         await pc.setRemoteDescription(new RTCSessionDescription(data.sdp))
