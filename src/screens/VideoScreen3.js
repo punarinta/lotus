@@ -222,7 +222,7 @@ export default class VideoScreen extends Component {
     }
 
     if (data.sdp) {
-      if (data.sdp.type === 'offer' && pc.signalingState !== 'have-local-offer') {
+      if (data.sdp.type === 'offer' /*&& pc.signalingState !== 'have-local-offer'*/) {
         console.log('setRemoteDescription for offer')
         await pc.setRemoteDescription(new RTCSessionDescription(data.sdp))
         const answer = await pc.createAnswer()
