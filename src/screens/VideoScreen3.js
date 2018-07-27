@@ -137,7 +137,7 @@ export default class VideoScreen extends Component {
     let candidates = []
     let candyWatch = null
 
-    pc.offerSent = false
+    pc.offer = false
 
     pc.onicecandidate = (event) => {
       console.log('SIGNAL icecandidate')
@@ -169,7 +169,7 @@ export default class VideoScreen extends Component {
       this.setState({connState: pc.iceConnectionState})
       console.log('SIGNAL oniceconnectionstatechange', pc.iceConnectionState)
       if (['failed','closed','disconnected'].includes(pc.iceConnectionState)) {
-        pc.offerSent = false
+        pc.offer = false
         nigDone[peerId] = false
       }
       /*if (pc.iceConnectionState === 'disconnected') {
@@ -205,15 +205,15 @@ export default class VideoScreen extends Component {
 
   createOffer = async (peerId) => {
     const pc = this.peers[peerId]
-    if (!pc.offerSent) {
-      const offer = await pc.createOffer()
+    const offer = await pc.createOffer()
 
+    if (!pc.offer && pc.signalingState !== 'have-remote-offer') {
       try {
         await pc.setLocalDescription(offer)
         this.socket.emit(peerId, 'exchange', {sdp: offer})
-        pc.offerSent = true
+        this.peers[peerId].offer = true
       } catch (e) {
-        console.log('pc.setLocalDescription(offer)')
+        console.log('ERROR IN pc.setLocalDescription(offer)', e)
       }
     }
   }
@@ -223,12 +223,14 @@ export default class VideoScreen extends Component {
     const peerId = data.rtcFrom
     const pc = this.peers[peerId] ? this.peers[peerId] : this.createPC(peerId, false)
 
-    if (data.sdp && !pc.offerSent) {
+    if (data.sdp && !pc.offer) {
 
       try {
-        await pc.setRemoteDescription(new RTCSessionDescription(data.sdp))
+
+        if (pc.signalingState !== 'have-local-offer') await pc.setRemoteDescription(new RTCSessionDescription(data.sdp))
 
         if (pc.remoteDescription.type === 'offer') {
+          pc.offer = true
           //  if (pc.signalingState !== 'stable') {
           const answer = await pc.createAnswer()
 
@@ -236,13 +238,13 @@ export default class VideoScreen extends Component {
             await pc.setLocalDescription(answer)
             this.socket.emit(peerId, 'exchange', { sdp: answer })
           } catch (e) {
-            console.log('pc.setLocalDescription(answer)')
+            console.log('ERROR IN pc.setLocalDescription(answer)', e)
           }
 
           //  }
         }
       } catch (e) {
-        console.log('pc.setRemoteDescription(new ...)')
+        console.log('ERROR IN pc.setRemoteDescription(new ...)', e)
       }
     }
 
@@ -263,7 +265,7 @@ export default class VideoScreen extends Component {
     // TODO: notify peers that you're out
     for (const i in this.peers) {
       this.peers[i].close()
-      this.peers[i].offerSent = false
+      this.peers[i].offer = false
     }
     if (stream) {
       stream.release()
