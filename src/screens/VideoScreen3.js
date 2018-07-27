@@ -151,9 +151,9 @@ export default class VideoScreen extends Component {
           candidates = []
         }, 1000)
 
-      //  if (event.candidate.candidate.includes(' udp ')) {
-      //    candidates.push(event.candidate)
-      //  }
+        if (event.candidate.candidate.includes(' udp ')) {
+          candidates.push(event.candidate)
+        }
       }
     }
 
