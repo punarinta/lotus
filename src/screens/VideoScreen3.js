@@ -201,8 +201,10 @@ export default class VideoScreen extends Component {
   createOffer = async (peerId) => {
     const pc = this.peers[peerId]
     const offer = await pc.createOffer()
-    await pc.setLocalDescription(offer)
-    this.socket.emit(peerId, 'exchange', {sdp: offer})
+    setTimeout(async () => {
+      await pc.setLocalDescription(offer)
+      this.socket.emit(peerId, 'exchange', {sdp: offer})
+    }, 350)
   }
 
   exchange = async (data) => {
@@ -231,9 +233,9 @@ export default class VideoScreen extends Component {
             this.peers[peerId].close()
             delete this.peers[peerId]
             console.log('Retrying for peer ' + peerId)
-            $.sessionId = Math.random()
-            this.socket.emit(null, 'join', $.sessionId)
-            //this.createPC(peerId, true)
+          //  $.sessionId = Math.random()
+          //  this.socket.emit(null, 'join', $.sessionId)
+            this.createPC(peerId, true)
           }
         }, 4000 + 2000 * Math.random())
       }
