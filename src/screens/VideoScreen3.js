@@ -131,6 +131,7 @@ export default class VideoScreen extends Component {
     let candidates = []
     let candyWatch = null
     this.setState({connState: '?'})
+    pc.iWillRetry = isOffer
 
     pc.onicecandidate = (event) => {
       console.log('SIGNAL icecandidate')
@@ -201,10 +202,10 @@ export default class VideoScreen extends Component {
   createOffer = async (peerId) => {
     const pc = this.peers[peerId]
     const offer = await pc.createOffer()
-    setTimeout(async () => {
+  //  setTimeout(async () => {
       await pc.setLocalDescription(offer)
       this.socket.emit(peerId, 'exchange', {sdp: offer})
-    }, 250)
+  //  }, 250)
   }
 
   exchange = async (data) => {
@@ -213,7 +214,7 @@ export default class VideoScreen extends Component {
     const pc = this.peers[peerId] ? this.peers[peerId] : this.createPC(peerId, false)
 
     if (data.sdp) {
-      setTimeout(async () => {
+    //  setTimeout(async () => {
         await pc.setRemoteDescription(new RTCSessionDescription(data.sdp))
         if (pc.remoteDescription.type === 'offer') {
           if (pc.signalingState !== 'stable') {
@@ -222,13 +223,13 @@ export default class VideoScreen extends Component {
             this.socket.emit(peerId, 'exchange', {sdp: answer})
           }
         }
-      }, 500)
+    //  }, 500)
     }
 
     if (data.candidates) {
       console.log('Adding candidates...')
 
-      if (!this.peers[peerId].watchdog) {
+      if (!this.peers[peerId].watchdog && pc.iWillRetry) {
         this.peers[peerId].watchdog = setTimeout(() => {
           console.log('Watchdog fired for state ' + this.state.connState)
           if (['failed','closed','disconnected','?'].includes(this.state.connState)) {
