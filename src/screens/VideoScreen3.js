@@ -201,9 +201,9 @@ export default class VideoScreen extends Component {
     }
 
     if (data.sdp) {
-      await pc.setRemoteDescription(new RTCSessionDescription(data.sdp))
       if (pc.remoteDescription.type === 'offer') {
         if (pc.signalingState !== 'stable') {
+          await pc.setRemoteDescription(new RTCSessionDescription(data.sdp))
           const desc = await pc.createAnswer()
           await pc.setLocalDescription(desc)
           this.socket.emit(fromId, 'exchange', { sdp: pc.localDescription })
