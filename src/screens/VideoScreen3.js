@@ -204,7 +204,7 @@ export default class VideoScreen extends Component {
     setTimeout(async () => {
       await pc.setLocalDescription(offer)
       this.socket.emit(peerId, 'exchange', {sdp: offer})
-    }, 350)
+    }, 250)
   }
 
   exchange = async (data) => {
@@ -213,14 +213,16 @@ export default class VideoScreen extends Component {
     const pc = this.peers[peerId] ? this.peers[peerId] : this.createPC(peerId, false)
 
     if (data.sdp) {
-      await pc.setRemoteDescription(new RTCSessionDescription(data.sdp))
-      if (pc.remoteDescription.type === 'offer') {
-        if (pc.signalingState !== 'stable') {
-          const answer = await pc.createAnswer()
-          await pc.setLocalDescription(answer)
-          this.socket.emit(peerId, 'exchange', { sdp: answer })
+      setTimeout(async () => {
+        await pc.setRemoteDescription(new RTCSessionDescription(data.sdp))
+        if (pc.remoteDescription.type === 'offer') {
+          if (pc.signalingState !== 'stable') {
+            const answer = await pc.createAnswer()
+            await pc.setLocalDescription(answer)
+            this.socket.emit(peerId, 'exchange', {sdp: answer})
+          }
         }
-      }
+      }, 500)
     }
 
     if (data.candidates) {
