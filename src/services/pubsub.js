@@ -20,7 +20,7 @@ class PubSub {
       console.log('Incoming msg:', e.data)
 
       try {
-        const json = JSON.parse(e.data)
+        let json = JSON.parse(e.data)
 
         if (!Array.isArray(json) || json.length !== 4) {
           console.log('Wrong format')
@@ -38,6 +38,8 @@ class PubSub {
         }
 
         if (this.listeners[json[2]]) {
+          // enhance with 'from' info
+          json[3].rtcFrom = json[1]
           this.listeners[json[2]](json[3])
         }
       } catch (e) {
