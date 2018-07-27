@@ -222,7 +222,7 @@ export default class VideoScreen extends Component {
     const peerId = data.rtcFrom
     const pc = this.peers[peerId] ? this.peers[peerId] : this.createPC(peerId, false)
 
-    if (data.sdp /*&& !nigDone[peerId]*/) {
+    if (data.sdp) {
 
       try {
 
@@ -230,18 +230,18 @@ export default class VideoScreen extends Component {
           await pc.setRemoteDescription(new RTCSessionDescription(data.sdp))
 
           if (pc.remoteDescription.type === 'offer') {
-          //  nigDone[peerId] = true
-            //  if (pc.signalingState !== 'stable') {
-            const answer = await pc.createAnswer()
 
-            try {
-              await pc.setLocalDescription(answer)
-              this.socket.emit(peerId, 'exchange', { sdp: answer })
-            } catch (e) {
-              console.log('ERROR IN pc.setLocalDescription(answer)', e)
+            if (pc.signalingState !== 'stable') {
+              const answer = await pc.createAnswer()
+
+              try {
+                await pc.setLocalDescription(answer)
+                this.socket.emit(peerId, 'exchange', { sdp: answer })
+              } catch (e) {
+                console.log('ERROR IN pc.setLocalDescription(answer)', e)
+              }
+
             }
-
-            //  }
           }
         }
 
