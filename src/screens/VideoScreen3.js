@@ -232,7 +232,8 @@ export default class VideoScreen extends Component {
             delete this.peers[peerId]
             console.log('Retrying for peer ' + peerId)
             $.sessionId = Math.random()
-            this.createPC(peerId, true)
+            this.socket.emit(null, 'join', $.sessionId)
+            //this.createPC(peerId, true)
           }
         }, 4000 + 2000 * Math.random())
       }
