@@ -23,19 +23,22 @@ class PubSub {
         const json = JSON.parse(e.data)
 
         if (!Array.isArray(json) || json.length !== 4) {
+          console.log('Wrong format')
           return
         }
 
         if (json[1] === $.sessionId) {
+          console.log('Message from myself')
           return
         }
 
         if (json[0] !== null && json[0] !== $.sessionId) {
+          console.log('Message to someone else')
           return
         }
 
-        if (this.listeners[json[0]]) {
-          this.listeners[json[0]](json[1])
+        if (this.listeners[json[2]]) {
+          this.listeners[json[2]](json[3])
         }
       } catch (e) {
         // console.log('WS message error', e)

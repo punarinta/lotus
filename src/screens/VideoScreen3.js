@@ -187,6 +187,8 @@ export default class VideoScreen extends Component {
       console.log('Local stream was not attached')
     }
 
+    console.log('PC created')
+
     return pc
   }
 
