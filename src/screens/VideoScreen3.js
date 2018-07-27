@@ -155,10 +155,11 @@ export default class VideoScreen extends Component {
     pc.oniceconnectionstatechange = () => {
       this.setState({connState: pc.iceConnectionState})
       console.log('SIGNAL oniceconnectionstatechange', pc.iceConnectionState)
-
-      let remoteStreams = this.state.remoteStreams
-      delete remoteStreams[peerId]
-      this.setState({ remoteStreams, inDaChat: false })
+      if (pc.iceConnectionState === 'disconnected') {
+        let remoteStreams = this.state.remoteStreams
+        delete remoteStreams[peerId]
+        this.setState({ remoteStreams, inDaChat: false })
+      }
     }
 
     pc.onaddstream = event => {
