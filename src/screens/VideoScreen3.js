@@ -36,7 +36,7 @@ export default class VideoScreen extends Component {
 
     this.socket.on('join', (remoteId) => {
       // someone tells yo (or everyone) that he joins
-      // create a PC with him
+      // create a PC with him, send him an offer
       this.createPC(remoteId, true)
     })
 
@@ -140,7 +140,7 @@ export default class VideoScreen extends Component {
     }, e => console.log('ERR getUserMedia', e))
   }
 
-  createPC = (forId, isOffer) => {
+  createPC = async (forId, isOffer) => {
     const pc = new RTCPeerConnection(webRTCConfig)
     let candidates = []
     let candyWatch = null
@@ -189,6 +189,10 @@ export default class VideoScreen extends Component {
 
     console.log('PC created')
 
+    if (isOffer) {
+      await this.createOffer(forId)
+    }
+
     return pc
   }
 
@@ -197,13 +201,12 @@ export default class VideoScreen extends Component {
     const offer = await pc.createOffer()
     await pc.setLocalDescription(offer)
     console.log('Sending from createOffer()')
-    //const msg = this.dbRef.push({cmd: 'rtc-exchange', sdp: pc.localDescription, sessionId: $.sessionId, from: MY_ID})
-    //msg.remove()
+    this.socket.emit(forId, 'exchange', {sdp: pc.localDescription})
   }
 
   exchange = async (data) => {
     console.log('EVENT exchange', data)
-    const fromId = data.from
+    const fromId = data.rtcFrom
     let pc = {}
 
     if (this.peers[fromId]) {
@@ -218,8 +221,8 @@ export default class VideoScreen extends Component {
         await pc.setRemoteDescription(new RTCSessionDescription(data.sdp))
         const answer = await pc.createAnswer()
         await pc.setLocalDescription(answer)
-        const msg = this.dbRef.push({cmd: 'rtc-exchange', sdp: pc.localDescription, sessionId: $.sessionId, from: MY_ID})
-        msg.remove()
+
+        this.socket.emit(fromId, 'exchange', {sdp: pc.localDescription})
       } else {
         console.log('ACHTUNG! have-local-offer')
       }
