@@ -12,8 +12,6 @@ const webRTCConfig = {'iceServers': [/*{'urls': 'stun:stun.services.mozilla.com'
 
 const MY_ID = 'vladimir.g.osipov-at-gmail.com'
 
-let nigDone = {};
-
 export default class VideoScreen extends Component {
 
   socket = null
@@ -44,11 +42,7 @@ export default class VideoScreen extends Component {
       this.createPC(remoteId, true)
     })
 
-    this.socket.on('exchange', (data) => {
-      this.exchange(data)
-      // .then(() => console.log('socket.on: EXCHANGE'))
-      //  .catch(err => console.log('ERR', err))
-    })
+    this.socket.on('exchange', this.exchange)
   }
 
   async componentDidMount() {
@@ -137,8 +131,6 @@ export default class VideoScreen extends Component {
     let candidates = []
     let candyWatch = null
 
-    nigDone[peerId] = false
-
     pc.onicecandidate = (event) => {
       console.log('SIGNAL icecandidate')
 
@@ -149,18 +141,17 @@ export default class VideoScreen extends Component {
           console.log('Sending all candidates...')
           this.socket.emit(null, 'exchange', {candidates})
           candidates = []
-        }, 1000)
+        }, 750)
 
-      //  if (event.candidate.candidate.includes(' udp ')) {
+        if (event.candidate.candidate.includes(' udp ')) {
           candidates.push(event.candidate)
-      //  }
+        }
       }
     }
 
     pc.onnegotiationneeded = () => {
       console.log('SIGNAL negotiationneeded')
-      if (isOffer /*&& !nigDone[peerId]*/) {
-        //nigDone[peerId] = true
+      if (isOffer) {
         this.createOffer(peerId).then(() => console.log('Offer created'))
       }
     }
@@ -169,7 +160,6 @@ export default class VideoScreen extends Component {
       this.setState({connState: pc.iceConnectionState})
       console.log('SIGNAL oniceconnectionstatechange', pc.iceConnectionState)
       if (['failed','closed','disconnected'].includes(pc.iceConnectionState)) {
-        nigDone[peerId] = false
       }
       /*if (pc.iceConnectionState === 'disconnected') {
         pc.close()
@@ -180,6 +170,11 @@ export default class VideoScreen extends Component {
         delete remoteStreams[peerId]
         this.setState({ remoteStreams, inDaChat: false })
       }*/
+      if (pc.iceConnectionState === 'connected') {
+        if (this.peers[peerId].watchdog) {
+          clearTimeout(this.peers[peerId].watchdog)
+        }
+      }
     }
 
     pc.onaddstream = event => {
@@ -205,16 +200,8 @@ export default class VideoScreen extends Component {
   createOffer = async (peerId) => {
     const pc = this.peers[peerId]
     const offer = await pc.createOffer()
-
-    if (!nigDone[peerId] /*&& pc.signalingState !== 'have-remote-offer'*/) {
-      try {
-        await pc.setLocalDescription(offer)
-        this.socket.emit(peerId, 'exchange', {sdp: offer})
-        nigDone[peerId] = true
-      } catch (e) {
-        console.log('ERROR IN pc.setLocalDescription(offer)', e)
-      }
-    }
+    await pc.setLocalDescription(offer)
+    this.socket.emit(peerId, 'exchange', {sdp: offer})
   }
 
   exchange = async (data) => {
@@ -223,49 +210,31 @@ export default class VideoScreen extends Component {
     const pc = this.peers[peerId] ? this.peers[peerId] : this.createPC(peerId, false)
 
     if (data.sdp) {
-
-      try {
-
-        if (1/*pc.signalingState !== 'have-local-offer'*/) {
-          await pc.setRemoteDescription(new RTCSessionDescription(data.sdp))
-
-          if (pc.remoteDescription.type === 'offer') {
-
-            if (pc.signalingState !== 'stable') {
-              const answer = await pc.createAnswer()
-
-              try {
-                await pc.setLocalDescription(answer)
-                this.socket.emit(peerId, 'exchange', { sdp: answer })
-              } catch (e) {
-                console.log('ERROR IN pc.setLocalDescription(answer)', e)
-              }
-
-            }
-          }
+      await pc.setRemoteDescription(new RTCSessionDescription(data.sdp))
+      if (pc.remoteDescription.type === 'offer') {
+        if (pc.signalingState !== 'stable') {
+          const answer = await pc.createAnswer()
+          await pc.setLocalDescription(answer)
+          this.socket.emit(peerId, 'exchange', { sdp: answer })
         }
-
-
-      } catch (e) {
-        console.log('ERROR IN pc.setRemoteDescription(new ...)', e)
       }
     }
 
     if (data.candidates) {
       console.log('Adding candidates...')
 
-      setTimeout(() => {
-        console.log('FIRE', this.state.connState)
+      this.peers[peerId].watchdog = setTimeout(() => {
+        console.log('Watchdog fired for state ' + this.state.connState)
         if (['failed','closed','disconnected','?'].includes(this.state.connState)) {
           if (this.peers[peerId]) {
             // reset the fukken flow
             this.peers[peerId].close()
             delete this.peers[peerId]
           }
-          console.log('Retrying for ' + peerId)
+          console.log('Retrying for peer ' + peerId)
           this.createPC(peerId, true)
         }
-      }, 4000 + 2000 * Math.random())
+      }, 5000 + 3000 * Math.random())
 
       for (const c of data.candidates) {
         await pc.addIceCandidate(new RTCIceCandidate(c))
@@ -274,7 +243,6 @@ export default class VideoScreen extends Component {
   }
 
   leaveChat = (goHome = false) => {
-    nigDone = {}
     const { stream } = this.state
     if (this.socket) {
       this.socket.close()
