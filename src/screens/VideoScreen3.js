@@ -63,8 +63,8 @@ export default class VideoScreen extends Component {
         })
     }
 
-  //  this.getLocalStream(stream => {
-  //    this.setState({stream})
+    this.getLocalStream(stream => {
+      this.setState({stream})
 
       if (!this.socket) {
         this.initSocket()
@@ -74,8 +74,7 @@ export default class VideoScreen extends Component {
       // 1) you join
       // 2) your ID is $.sessionId
       this.socket.emit(null, 'join', $.sessionId)
-
-  // })
+   })
   }
 
   componentWillUnmount() {
@@ -120,7 +119,7 @@ export default class VideoScreen extends Component {
     }, e => console.log('ERR getUserMedia', e))
   }
 
-  createPC = (forId, isOffer) => {
+  createPC = (peerId, isOffer) => {
     const pc = new RTCPeerConnection(webRTCConfig)
     let candidates = []
     let candyWatch = null
@@ -148,7 +147,7 @@ export default class VideoScreen extends Component {
     pc.onnegotiationneeded = () => {
       console.log('SIGNAL negotiationneeded')
       if (isOffer) {
-        this.createOffer(forId).then(() => console.log('Offer created'))
+        this.createOffer(peerId).then(() => console.log('Offer created'))
       }
     }
 
@@ -160,11 +159,9 @@ export default class VideoScreen extends Component {
     pc.onaddstream = event => {
       console.log('SIGNAL addstream')
       let remoteStreams = this.state.remoteStreams
-      remoteStreams[forId] = event.stream
+      remoteStreams[peerId] = event.stream
       this.setState({ remoteStreams, inDaChat: true })
     }
-
-    this.peers[forId] = pc
 
     if (this.state.stream) {
       pc.addStream(this.state.stream)
@@ -172,71 +169,42 @@ export default class VideoScreen extends Component {
       console.log('Local stream was not attached')
     }
 
-    console.log('PC created with ' + forId)
+    this.peers[peerId] = pc
+
+    console.log('PC created with ' + peerId)
 
     if (isOffer) {
-      this.createOffer(forId)
+      this.createOffer(peerId)
     }
 
     return pc
   }
 
-  createOffer = async (forId) => {
-    const pc = this.peers[forId]
+  createOffer = async (peerId) => {
+    const pc = this.peers[peerId]
     const offer = await pc.createOffer()
     await pc.setLocalDescription(offer)
     console.log('Sending from createOffer()')
-    this.socket.emit(forId, 'exchange', {sdp: pc.localDescription})
+    this.socket.emit(peerId, 'exchange', {sdp: pc.localDescription})
   }
 
   exchange = async (data) => {
     console.log('EVENT exchange', data)
-    const fromId = data.rtcFrom
-    let pc = {}
-
-    if (this.peers[fromId]) {
-      pc = this.peers[fromId]
-    } else {
-      pc = this.createPC(fromId, false)
-    }
+    const peerId = data.rtcFrom
+    const pc = this.peers[peerId] ? this.peers[peerId] : this.createPC(peerId, false)
 
     if (data.sdp) {
-      if (pc.remoteDescription.type === 'offer') {
+      await pc.setRemoteDescription(new RTCSessionDescription(data.sdp))
+      if (data.sdp.type === 'offer') {
         if (pc.signalingState !== 'stable') {
-          await pc.setRemoteDescription(new RTCSessionDescription(data.sdp))
           const desc = await pc.createAnswer()
-          await pc.setLocalDescription(desc)
-          this.socket.emit(fromId, 'exchange', { sdp: pc.localDescription })
+          pc.setLocalDescription(desc)
+          this.socket.emit(peerId, 'exchange', { sdp: desc })
         }
       }
     }
     else {
       await pc.addIceCandidate(new RTCIceCandidate(data.candidate))
-    }
-
-    return
-
-    if (data.sdp) {
-      if (data.sdp.type === 'offer' /*&& pc.signalingState !== 'have-local-offer'*/) {
-        console.log('setRemoteDescription for offer')
-        await pc.setRemoteDescription(new RTCSessionDescription(data.sdp))
-        const answer = await pc.createAnswer()
-        await pc.setLocalDescription(answer)
-
-        this.socket.emit(fromId, 'exchange', {sdp: pc.localDescription})
-      } else {
-        console.log('ACHTUNG! have-local-offer')
-      }
-      if (data.sdp.type === 'answer') {
-        pc.setRemoteDescription(new RTCSessionDescription(data.sdp))
-      }
-    }
-    else {
-      /*for (const c of data.candidates) {
-        console.log('Adding candidates...')
-        await pc.addIceCandidate(new RTCIceCandidate(c))
-      }*/
-      pc.addIceCandidate(new RTCIceCandidate(data.candidate))
     }
   }
 
