@@ -12,6 +12,8 @@ const webRTCConfig = {'iceServers': [{'urls': 'stun:stun.services.mozilla.com'},
 
 const MY_ID = 'vladimir.g.osipov-at-gmail.com'
 
+let nigDone = {};
+
 export default class VideoScreen extends Component {
 
   socket = null
@@ -37,7 +39,7 @@ export default class VideoScreen extends Component {
     this.socket = new PubSub(false, '46.101.117.47', '/', 'ch-1337')// + this.navParams.peer)
 
     this.socket.on('join', (remoteId) => {
-      // someone tells yo (or everyone) that he joins
+      // someone tells you (or everyone) that he has joined (within message live time)
       // create a PC with him, send him an offer
       this.createPC(remoteId, true)
     })
@@ -120,10 +122,22 @@ export default class VideoScreen extends Component {
     }, e => console.log('ERR getUserMedia', e))
   }
 
+  addStreams = () => {
+    if (this.state.stream) {
+      for (const i in this.peers) {
+        this.peers[i].addStream(this.state.stream)
+      }
+    } else {
+      console.log('Local stream was not attached')
+    }
+  }
+
   createPC = (peerId, isOffer) => {
     const pc = new RTCPeerConnection(webRTCConfig)
     let candidates = []
     let candyWatch = null
+
+    pc.offerSent = false
 
     pc.onicecandidate = (event) => {
       console.log('SIGNAL icecandidate')
@@ -140,14 +154,13 @@ export default class VideoScreen extends Component {
         if (event.candidate.candidate.includes(' udp ')) {
           candidates.push(event.candidate)
         }
-
-        //this.socket.emit(null, 'exchange', {candidate: event.candidate})
       }
     }
 
     pc.onnegotiationneeded = () => {
       console.log('SIGNAL negotiationneeded')
-      if (isOffer) {
+      if (isOffer && !nigDone[peerId]) {
+        nigDone[peerId] = true
         this.createOffer(peerId).then(() => console.log('Offer created'))
       }
     }
@@ -155,6 +168,10 @@ export default class VideoScreen extends Component {
     pc.oniceconnectionstatechange = () => {
       this.setState({connState: pc.iceConnectionState})
       console.log('SIGNAL oniceconnectionstatechange', pc.iceConnectionState)
+      if (['failed','closed'].includes(pc.iceConnectionState)) {
+        pc.offerSent = false
+        nigDone[peerId] = false
+      }
       /*if (pc.iceConnectionState === 'disconnected') {
         pc.close()
         if (this.peers[peerId]) {
@@ -191,7 +208,8 @@ export default class VideoScreen extends Component {
     const offer = await pc.createOffer()
     await pc.setLocalDescription(offer)
     console.log('Sending from createOffer()')
-    this.socket.emit(peerId, 'exchange', {sdp: pc.localDescription})
+    this.socket.emit(peerId, 'exchange', {sdp: offer})
+    pc.offerSent = true
   }
 
   exchange = async (data) => {
@@ -201,16 +219,15 @@ export default class VideoScreen extends Component {
 
     if (data.sdp) {
       await pc.setRemoteDescription(new RTCSessionDescription(data.sdp))
-      if (data.sdp.type === 'offer') {
+      if (data.sdp.type === 'offer' /*&& !pc.offerSent*/) {
         if (pc.signalingState !== 'stable') {
-          const desc = await pc.createAnswer()
-          pc.setLocalDescription(desc)
-          this.socket.emit(peerId, 'exchange', { sdp: desc })
+          const answer = await pc.createAnswer()
+          pc.setLocalDescription(answer)
+          this.socket.emit(peerId, 'exchange', { sdp: answer })
         }
       }
     }
     else {
-      //await pc.addIceCandidate(new RTCIceCandidate(data.candidate))
       console.log('Adding candidates...')
       for (const c of data.candidates) {
         await pc.addIceCandidate(new RTCIceCandidate(c))
@@ -219,6 +236,7 @@ export default class VideoScreen extends Component {
   }
 
   leaveChat = (goHome = false) => {
+    nigDone = {};
     const { stream } = this.state
     if (this.socket) {
       this.socket.close()
@@ -281,6 +299,13 @@ export default class VideoScreen extends Component {
           <TouchableOpacity
             activeOpacity={0.8}
             onPress={this.leaveChat}
+            style={[styles.controlButton, {backgroundColor: 'rgba(255,0,0,.7)'}]}
+          >
+            <EndCallSvg color="#fff" size={svgSize}/>
+          </TouchableOpacity>
+          <TouchableOpacity
+            activeOpacity={0.8}
+            onPress={this.addStreams}
             style={[styles.controlButton, {backgroundColor: 'rgba(255,0,0,.7)'}]}
           >
             <EndCallSvg color="#fff" size={svgSize}/>
