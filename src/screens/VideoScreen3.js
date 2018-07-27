@@ -1,11 +1,12 @@
 import React, { Component } from 'react'
-import { View, Text, StyleSheet, Platform, Dimensions } from 'react-native'
+import { View, Text, StyleSheet, Platform, Dimensions, TouchableOpacity } from 'react-native'
 import { RTCPeerConnection, RTCIceCandidate, RTCSessionDescription, RTCView, MediaStreamTrack, getUserMedia } from 'react-native-webrtc'
 import InCallManager from 'react-native-incall-manager'
 import { NavigationActions, StackActions } from 'react-navigation'
 import Theme from 'config/theme'
 import I18n from 'i18n'
 import { PubSub } from 'services/pubsub'
+import EndCallSvg from 'components/svg/EndCall'
 
 const webRTCConfig = {'iceServers': [{'urls': 'stun:stun.services.mozilla.com'}, {'urls': 'stun:stun.l.google.com:19302'}]}
 
@@ -44,29 +45,7 @@ export default class VideoScreen extends Component {
     this.socket.on('exchange', (data) => {
       this.exchange(data)
       // .then(() => console.log('socket.on: EXCHANGE'))
-        .catch(err => console.log('ERR', err))
-    })
-
-    this.socket.on('leave-room', (id) => {
-      if (id !== this.socket.id) {
-        this.setState(prevState => {
-          const newStreams = prevState.remoteStreams
-
-          if (this.peers[id]) {
-            this.peers[id].close()
-            delete this.peers[id]
-          }
-
-          delete newStreams[id]
-          return {
-            ...prevState,
-            remoteStreams: newStreams,
-          }
-        })
-
-        console.log(`User ${id} left the room`)
-        this.leaveChat(true)
-      }
+      //  .catch(err => console.log('ERR', err))
     })
   }
 
@@ -141,7 +120,7 @@ export default class VideoScreen extends Component {
     }, e => console.log('ERR getUserMedia', e))
   }
 
-  createPC = async (forId, isOffer) => {
+  createPC = (forId, isOffer) => {
     const pc = new RTCPeerConnection(webRTCConfig)
     let candidates = []
     let candyWatch = null
@@ -196,7 +175,7 @@ export default class VideoScreen extends Component {
     console.log('PC created with ' + forId)
 
     if (isOffer) {
-      await this.createOffer(forId)
+      this.createOffer(forId)
     }
 
     return pc
@@ -312,7 +291,7 @@ export default class VideoScreen extends Component {
   }
 
   render() {
-
+    const svgSize = Theme.isTablet ? 48 : 24
     const { stream, remoteStreams } = this.state
 
     return (
@@ -335,6 +314,15 @@ export default class VideoScreen extends Component {
             </View>
           </View>
         }
+        <View style={styles.controlButtons}>
+          <TouchableOpacity
+            activeOpacity={0.8}
+            onPress={this.leaveChat}
+            style={[styles.controlButton, {backgroundColor: 'rgba(255,0,0,.7)'}]}
+          >
+            <EndCallSvg color="#fff" size={svgSize}/>
+          </TouchableOpacity>
+        </View>
         <View style={styles.selfViewWrapper}>
           {
             stream ? <RTCView streamURL={stream.toURL()} style={styles.selfView} /> : null
@@ -395,5 +383,24 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     zIndex: 10,
+  },
+  controlButtons: {
+    zIndex: 11,
+    position: 'absolute',
+    left: 0,
+    bottom: 0,
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255,255,255,.3)',
+  },
+  controlButton: {
+    width: Theme.isTablet ? 96 : 48,
+    height: Theme.isTablet ? 96 : 48,
+    marginHorizontal: Theme.isTablet ? 16 : 8,
+    marginVertical: 8,
+    borderRadius: Theme.isTablet ? 48 : 24,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 })
