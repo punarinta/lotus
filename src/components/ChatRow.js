@@ -18,7 +18,8 @@ export default class ChatRow extends Component {
       <TouchableOpacity
         style={styles.container}
         activeOpacity={0.8}
-        onPress={() => $.navigator.navigate('Chat', { peer: this.props.id })}
+        onPress={() => $.navigator.navigate('Room', { peer: this.props.id })}
+        onLongPress={() => $.navigator.navigate('Room', { peer: this.props.id })}
       >
         <View style={styles.ava}>
           <Text style={styles.avaText}>{ avaText }</Text>
@@ -34,26 +35,30 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: '#222',
+    borderBottomColor: Theme.black,
     height: 64,
-    backgroundColor: '#fff',
+    backgroundColor: Theme.white,
     flexDirection: 'row',
   },
   ava: {
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'rgba(0,0,0,.1)',
-    borderRadius: 48,
-    height: 48,
-    width: 48,
-    margin: 8,
+    backgroundColor: Theme.gray,
+    borderRadius: 44,
+    height: 44,
+    width: 44,
+    margin: 10,
+
+    elevation: 3, // android
   },
   avaText: {
-    color: '#fff',
+    color: Theme.white,
     fontSize: 18,
+    paddingBottom: 2,
   },
   nameText: {
-    fontSize: 16,
-    color: '#000',
+    fontSize: 15,
+    color: Theme.black,
+    fontFamily: 'sans-serif-light', // TODO: ios
   },
 })

@@ -79,9 +79,9 @@ export default class InterwebzNotice extends Component {
           onPress={null}
         >
           <View style={styles.container}>
-            <WiFiSvg color={Theme.activeGreen} size={Theme.isTablet ? 128 : 64} />
+            <WiFiSvg color={Theme.gray} size={Theme.isTablet ? 128 : 64} />
             <Text style={styles.message}>{ I18n.t('mbox.noInterwebz') }</Text>
-            <Button caption="Retry" onPress={this.retry}/>
+            <Button caption={ I18n.t('buttons.retry') } onPress={this.retry}/>
           </View>
         </TouchableOpacity>
       </Modal>
@@ -101,7 +101,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   container: {
-    backgroundColor: '#fff',
+    backgroundColor: Theme.white,
     padding: Theme.isTablet ? 24 : 16,
     borderRadius: 8,
     alignItems: 'center',

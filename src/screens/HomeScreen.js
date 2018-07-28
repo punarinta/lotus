@@ -1,6 +1,8 @@
 import React, { Component } from 'react'
-import { View, StyleSheet, Text } from 'react-native'
+import { View, StyleSheet, TouchableOpacity } from 'react-native'
 import ChatsList from 'components/ChatsList'
+import Theme from 'config/theme'
+import GroupAddSvg from 'components/svg/GroupAdd'
 
 const sampleChats = [
   {
@@ -8,32 +10,32 @@ const sampleChats = [
     name: 'John Doe',
   },
   {
-    id: 'guy511@britain.test',
-    name: 'Guido Fawkes',
+    id: 'ronald.pierce@user.test',
+    name: 'Ronald Pierce',
+  },
+  {
+    id: 'mike.hudson@user.test',
+    name: 'Mike Hudson',
   },
 ]
 
 export default class HomeScreen extends Component {
 
+  addChat = () => {
+
+  }
+
   render() {
     return (
       <View style={styles.container}>
         <ChatsList items={sampleChats} />
-
-        {
-          /*
-            <Text>Hello</Text>
-            <Button
-              title="Chat 1"
-              onPress={() => $.navigator.navigate('Chat', {peer: 1})}
-            />
-            <Button
-              title="Chat 2"
-              onPress={() => $.navigator.navigate('Chat', {peer: 2})}
-            />
-           */
-        }
-
+        <TouchableOpacity
+          style={styles.addChat}
+          activeOpacity={0.8}
+          onPress={this.addChat}
+        >
+          <GroupAddSvg color={Theme.black}/>
+        </TouchableOpacity>
       </View>
     )
   }
@@ -42,6 +44,19 @@ export default class HomeScreen extends Component {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: Theme.gray,
+  },
+  addChat: {
+    backgroundColor: Theme.white,
+    width: 48,
+    height: 48,
+    borderRadius: 48,
+    position: 'absolute',
+    right: 18,
+    bottom: 18,
+    justifyContent: 'center',
+    alignItems: 'center',
+
+    elevation: 5, // android
   },
 })
