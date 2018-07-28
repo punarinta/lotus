@@ -9,7 +9,8 @@ To add:
 * file transfer
 * collaborative sketching
 * custom emojis
-* contact book
+* contact book (UI)
 * server federation (Redis and Redisless)
 * 'last seen'
+* avatars
 * 

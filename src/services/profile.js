@@ -1,6 +1,19 @@
 import store from 'core/store'
+import PropTypes from 'prop-types'
 
 class ProfileSvc {
+
+  static schema = {
+    ver: PropTypes.number.isRequired,
+    id: PropTypes.string.isRequired,
+    lastSync: PropTypes.instanceOf(Date).isRequired,
+
+    emails: PropTypes.arrayOf(PropTypes.string),
+    name: PropTypes.string,
+    ava: PropTypes.instanceOf(Uint8Array),
+    lastSeen: PropTypes.instanceOf(Date),
+  }
+
   /**
    * Returns a user profile
    *

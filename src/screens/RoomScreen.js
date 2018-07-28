@@ -3,11 +3,11 @@ import { View, Text, StyleSheet, Dimensions, TouchableOpacity } from 'react-nati
 import { RTCPeerConnection, RTCIceCandidate, RTCSessionDescription } from 'react-native-webrtc'
 import { NavigationActions, StackActions } from 'react-navigation'
 import Theme from 'config/theme'
-import I18n from 'i18n'
 import { PubSub } from 'services/pubsub'
-import EndCallSvg from 'components/svg/EndCall'
 import Messenger from 'components/Messenger'
 import AVModal from 'modals/AVModal'
+import { ProfileSvc } from 'services/profile'
+import I18n from 'i18n'
 
 const webRTCConfig = {'iceServers': [{'urls': 'stun:stun.services.mozilla.com'}, {'urls': 'stun:stun.l.google.com:19302'}]}
 
@@ -19,8 +19,8 @@ export default class RoomScreen extends Component {
     super(props)
 
     this.state = {
-      connState: '-',
       isAVOn: false,
+      connState: '-',
       remoteStreams: {},
     }
   }
@@ -144,11 +144,11 @@ export default class RoomScreen extends Component {
       }
     }
 
-    const chText = pc.createDataChannel('chat', {negotiated: true, id: 0})
-  //  chText.onopen = () => chText.send('Hi you!')
-    chText.onmessage = (event) => this.onDataRead(0, peerId, event.data)
-
-    pc.dataChannels[0] = chText
+    ['text', 'aux'].forEach((chName, i) => {
+      const ch = pc.createDataChannel(chName, { negotiated: true, id: i })
+      ch.onmessage = (event) => this.onDataRead(i, peerId, event.data)
+      pc.dataChannels[i] = ch
+    })
 
     this.peers[peerId] = pc
 
@@ -180,7 +180,15 @@ export default class RoomScreen extends Component {
       const json = JSON.parse(data)
       switch (json.cmd) {
         case 'whoAreYou':
-          this.dataSend(1, peerId, JSON.stringify({cmd: 'iAm', info: {name: 'Se'}}))
+          this.dataSend(1, peerId, JSON.stringify({cmd: 'iAm', info: {name: 'Session ' + $.sessionId}}))
+          break
+
+        case 'iAm':
+          ProfileSvc.update(json.info.id, json.info)
+          break
+
+        default:
+          console.log('Unknown command in AUX channel: ' + json.cmd)
       }
     }
   }
