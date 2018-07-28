@@ -46,7 +46,6 @@ export default class ChatScreen extends Component {
   async componentDidMount() {
 
     this.peers = {}
-    $.sessionId = Math.random()
 
     if (Platform.OS === 'ios' && InCallManager.recordPermission !== 'granted') {
       InCallManager.requestRecordPermission()
