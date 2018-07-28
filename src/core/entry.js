@@ -3,6 +3,7 @@ import { StackNavigator } from 'react-navigation'
 import { Animated, Easing } from 'react-native'
 import RoutesConfig from 'config/routes'
 import MessageBox from 'modals/MessageBox'
+import Theme from 'config/theme'
 
 const AppNavigator = StackNavigator(RoutesConfig, {
   mode: 'modal',
@@ -25,7 +26,10 @@ const AppNavigator = StackNavigator(RoutesConfig, {
 
       return { transform: [{ translateX }] }
     },
-  })
+  }),
+  cardStyle: {
+    backgroundColor: Theme.black,
+  },
 })
 
 export default class ApplicationEntry extends Component {

@@ -16,6 +16,12 @@ const theme = {
   activeGray: '#a7a7a7',
   inactiveGray: '#e0e0e0',
   required: 'red',
+
+  white: '#e9e9e9',
+  black: '#393637',
+  gray: '#5c5a5a',
+  lightGray: '#8a8989',
+
   debug: {
     borderWidth: 1,
     borderColor: 'red',

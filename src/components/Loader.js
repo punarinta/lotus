@@ -3,23 +3,6 @@ import PropTypes from 'prop-types'
 import { View, ActivityIndicator, Platform } from 'react-native'
 import Theme from 'config/theme'
 
-const styles = {
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  loader: [{
-    height: 64,
-    width: 64,
-    backgroundColor: '#fff',
-    borderRadius: 32,
-  }, Platform.OS === 'ios' ? {
-    paddingTop: 4,
-    paddingLeft: 3,
-  } : {}]
-}
-
 export default class Loader extends Component {
 
   static propTypes = {
@@ -41,10 +24,27 @@ export default class Loader extends Component {
               animating={true}
               size="large"
               style={styles.loader}
-              color={Theme.activeGreen}
+              color={Theme.white}
             /> : null
         }
       </View>
     )
   }
+}
+
+const styles = {
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loader: [{
+    height: 64,
+    width: 64,
+    backgroundColor: Theme.gray,
+    borderRadius: 32,
+  }, Platform.OS === 'ios' ? {
+    paddingTop: 4,
+    paddingLeft: 3,
+  } : {}]
 }

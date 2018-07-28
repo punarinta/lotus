@@ -3,11 +3,13 @@ import PropTypes from 'prop-types'
 import store from 'core/store'
 import Loader from 'components/Loader'
 import { NavigationActions, StackActions } from 'react-navigation'
+import { StatusBar } from 'react-native'
 import I18n from 'i18n'
 import { SysSvc } from 'services/sys'
 import { FcmSvc } from 'services/fcm'
 import firebase from 'react-native-firebase'
 import InCallManager from 'react-native-incall-manager'
+import Theme from 'config/theme'
 
 export default class SplashScreen extends Component {
   static propTypes = {
@@ -27,6 +29,9 @@ export default class SplashScreen extends Component {
   }
 
   async componentWillMount() {
+
+    StatusBar.setBarStyle('light-content')
+    StatusBar.setBackgroundColor(Theme.gray)
 
     const enabled = await firebase.messaging().hasPermission()
 
@@ -82,6 +87,7 @@ export default class SplashScreen extends Component {
 
     firebase.messaging().subscribeToTopic('topic-vladimir.g.osipov-at-gmail.com')
 
+    // TODO: remove this later
     InCallManager.setKeepScreenOn(true)
 
     this.setState({hydrated: true})
