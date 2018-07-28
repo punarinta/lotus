@@ -1,7 +1,7 @@
 class PubSub {
 
-  ok = false
   ws = null
+  ok = false
   listeners = {}
 
   constructor(secure, server, path, channelId) {
@@ -9,54 +9,63 @@ class PubSub {
     this.path = path
     this.channelId = channelId
     this.secure = secure
+  }
 
-    const ws = new WebSocket((secure ? 'wss://' : 'ws://') + server + path + '/sub/' + channelId)
+  async init() {
 
-    ws.onopen = () => {
-      this.ok = true
-    }
+    return new Promise((resolve) => {
+      const ws = new WebSocket((this.secure ? 'wss://' : 'ws://') + this.server + this.path + '/sub/' + this.channelId)
 
-    ws.onmessage = (e) => {
-      //console.log('Incoming msg:', e.data)
-
-      try {
-        let json = JSON.parse(e.data)
-
-        if (!Array.isArray(json) || json.length !== 4) {
-          //console.log('Wrong format')
-          return
-        }
-
-        if (json[1] === $.sessionId) {
-          //console.log('Message from myself')
-          return
-        }
-
-        if (json[0] !== null && json[0] !== $.sessionId) {
-          //console.log('Message to someone else')
-          return
-        }
-
-        if (this.listeners[json[2]]) {
-          // enhance with 'from' info
-          json[3].rtcFrom = json[1]
-          this.listeners[json[2]](json[3])
-        }
-      } catch (e) {
-        // console.log('WS message error', e)
+      ws.onopen = () => {
+        this.ok = true
+        resolve(true)
       }
-    }
 
-    ws.onerror = (e) => {
-      console.log('WS error', e.message)
-    }
+      ws.onmessage = (e) => {
+        //console.log('Incoming msg:', e.data)
 
-    ws.onclose = (e) => {
-      console.log('Socket closed', e.code, e.reason)
-      this.ok = false
-    }
+        try {
+          let json = JSON.parse(e.data)
 
-    this.ws = ws
+          if (!Array.isArray(json) || json.length !== 4) {
+            //console.log('Wrong format')
+            return
+          }
+
+          if (json[1] === $.sessionId) {
+            //console.log('Message from myself')
+            return
+          }
+
+          if (json[0] !== null && json[0] !== $.sessionId) {
+            //console.log('Message to someone else')
+            return
+          }
+
+          if (this.listeners[json[2]]) {
+            // enhance with 'from' info
+            json[3].rtcFrom = json[1]
+            this.listeners[json[2]](json[3])
+          }
+        } catch (e) {
+          // console.log('WS message error', e)
+        }
+      }
+
+      ws.onerror = (e) => {
+        console.log('WS error', e.message)
+      }
+
+      ws.onclose = (e) => {
+        console.log('Socket closed', e.code, e.reason)
+        if (!this.ok) {
+          resolve(false)
+        }
+        this.ok = false
+      }
+
+      this.ws = ws
+    })
   }
 
   on(event, callback) {
