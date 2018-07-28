@@ -1,6 +1,6 @@
 import React, { PureComponent } from 'react'
 import { FlatList } from 'react-native'
-import ChatRow from 'components/ChatRow'
+import ChatRow from './ChatRow'
 
 export default class ChatsList extends PureComponent {
 

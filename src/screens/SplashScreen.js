@@ -44,13 +44,14 @@ export default class SplashScreen extends Component {
     } else {
     }
 
-    await store.init({persist:['']})
+    await store.init({persist:['phonebook']})
 
     // set default values
     window.$ = Object.assign({
       navigator: this.props.navigation,
       resetNavigationTo: this.resetNavigationTo,
       sessionId: Math.random(),
+      phonebook: {},
     }, $)
 
     I18n.init('en_US')

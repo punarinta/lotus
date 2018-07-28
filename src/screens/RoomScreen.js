@@ -19,9 +19,9 @@ export default class RoomScreen extends Component {
     super(props)
 
     this.state = {
-      remoteStreams: {},
       connState: '-',
       isAVOn: false,
+      remoteStreams: {},
     }
   }
 
@@ -29,14 +29,18 @@ export default class RoomScreen extends Component {
     return this.props.navigation.state && this.props.navigation.state.params ? this.props.navigation.state.params : {}
   }
 
-  initpubsub = () => {
+  initPubSub = async () => {
     if (!this.navParams.peer) {
       return false
     }
-    // TODO: use aggregated path, e.g. '/lotus'
-    // TODO: check offline mode
+
     // TODO: support more than one peer -> change chat ID
-    this.pubsub = new PubSub(false, '46.101.117.47', '/', 'ch-' + this.navParams.peer.replace('@', '-at-'))
+    this.pubsub = new PubSub(false, '46.101.117.47', '/lotus', 'ch-' + this.navParams.peer.replace('@', '-at-'))
+
+    if (! await this.pubsub.init()) {
+      console.log('PubSub server connection failure')
+      return false
+    }
 
     this.pubsub.on('join', (remoteId) => {
       this.createPC(remoteId, true)
@@ -50,7 +54,7 @@ export default class RoomScreen extends Component {
 
     this.peers = {}
     if (!this.pubsub) {
-      if (!this.initpubsub()) {
+      if (! await this.initPubSub()) {
         return false
       }
     }
@@ -65,15 +69,11 @@ export default class RoomScreen extends Component {
 
   onStreamChange = (state, stream = null, callback = () => null) => {
     if (state === 'off') {
-      for (const i in this.peers) {
-        this.peers[i].removeStream(stream)
-      }
+      for (const i in this.peers) this.peers[i].removeStream(stream)
       callback()
     }
     if (stream) {
-      for (const i in this.peers) {
-        this.peers[i].addStream(stream)
-      }
+      for (const i in this.peers) this.peers[i].addStream(stream)
       callback()
     }
   }
@@ -176,6 +176,13 @@ export default class RoomScreen extends Component {
     // hardcode data channel subscribers
     if (this.refs.msg) this.refs.msg.takeData(chId, peerId, data)
     // if (this.refs.skt) this.refs.skt.takeData(chId, peerId, data)
+    if (chId === 1) {
+      const json = JSON.parse(data)
+      switch (json.cmd) {
+        case 'whoAreYou':
+          this.dataSend(1, peerId, JSON.stringify({cmd: 'iAm', info: {name: 'Se'}}))
+      }
+    }
   }
 
   createOffer = async (peerId) => {
@@ -254,6 +261,7 @@ export default class RoomScreen extends Component {
       <Messenger
         key="msg"
         ref="msg"
+        onNewData={this.dataSend}
       />
     ]
   }
