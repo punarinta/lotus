@@ -24,7 +24,10 @@ export default class ChatRow extends Component {
         <View style={styles.ava}>
           <Text style={styles.avaText}>{ avaText }</Text>
         </View>
-        <Text style={styles.nameText}>{ this.props.name }</Text>
+        <View style={styles.notAva}>
+          <Text style={styles.nameText}>{ this.props.name }</Text>
+
+        </View>
       </TouchableOpacity>
     )
   }
@@ -34,8 +37,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     alignItems: 'center',
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: Theme.black,
     height: 64,
     backgroundColor: Theme.white,
     flexDirection: 'row',
@@ -52,6 +53,13 @@ const styles = StyleSheet.create({
     margin: 10,
 
     elevation: 3, // android
+  },
+  notAva: {
+    // borderBottomWidth: StyleSheet.hairlineWidth,
+    // borderBottomColor: Theme.gray,
+    flex: 1,
+    height: 64,
+    justifyContent: 'center',
   },
   avaText: {
     color: Theme.black,

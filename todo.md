@@ -1,5 +1,4 @@
 To fix:
-* iOS header
 * iOS keyboard covering messenger
 * 
 

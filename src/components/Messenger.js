@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { View, StyleSheet, TextInput, FlatList, TouchableOpacity, Text } from 'react-native'
+import { View, StyleSheet, TextInput, FlatList, TouchableOpacity } from 'react-native'
 import Theme from 'config/theme'
 import MessageRow from './MessageRow'
 import SendSvg from './svg/Send'
@@ -98,7 +98,7 @@ const styles = StyleSheet.create({
   msgs: {
     flex: 1,
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: Theme.black,
+    borderBottomColor: Theme.gray,
   },
   bottomBar: {
     flexDirection: 'row',

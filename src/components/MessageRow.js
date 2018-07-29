@@ -33,10 +33,10 @@ const styles = StyleSheet.create({
   bubble: {
     padding: 8,
     borderRadius: 6,
-    borderColor: Theme.black,
+    borderColor: Theme.gray,
     borderWidth: StyleSheet.hairlineWidth,
     backgroundColor: Theme.white,
-    elevation: 1, // android
+    //elevation: 1, // android
   },
   bblLocal: {
     marginLeft: 64,

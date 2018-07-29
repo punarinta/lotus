@@ -323,7 +323,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     backgroundColor: Theme.white,
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: Theme.black,
+    borderBottomColor: Theme.gray,
     alignItems: 'center',
   },
   navButton: {
@@ -331,7 +331,5 @@ const styles = StyleSheet.create({
     height: 48,
     justifyContent: 'center',
     alignItems: 'center',
-    //borderRightColor: Theme.black,
-    //borderRightWidth: StyleSheet.hairlineWidth,
   }
 })
