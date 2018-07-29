@@ -80,7 +80,6 @@ export default class RoomScreen extends Component {
 
   createPC = (peerId, isOffer) => {
     const pc = new RTCPeerConnection(webRTCConfig)
-    this.peers[peerId] = pc
 
     let candidates = []
     let candyWatch = null
@@ -114,7 +113,7 @@ export default class RoomScreen extends Component {
 
     pc.oniceconnectionstatechange = () => {
       this.setState({connState: pc.iceConnectionState})
-      console.log('SIGNAL oniceconnectionstatechange', pc.iceConnectionState)
+      console.log('SIGNAL oniceconnectionstatechange', pc.iceConnectionState , peerId)
       if (['failed','closed','disconnected'].includes(pc.iceConnectionState)) {
       }
       if (pc.iceConnectionState === 'connected') {
@@ -153,6 +152,8 @@ export default class RoomScreen extends Component {
       pc.dataChannels[i] = ch
     })
 
+    this.peers[peerId] = pc
+
     console.log('PC created with ' + peerId)
 
     return pc
@@ -160,18 +161,11 @@ export default class RoomScreen extends Component {
 
   dataSend = (chId, peerId, data) => {
 
-    console.log('DATA SENT', chId, peerId, data)
-
-    if (peerId === null) {
-      for (const i in this.peers) {
-        if (i === peerId) {
-          this.peers[i].dataChannels[chId].send(data)
-          break
-        }
-      }
-    } else {
-      for (const pc in this.peers) {
-        pc.dataChannels[chId].send(data)
+    for (const i in this.peers) {
+      if (peerId === null || i === peerId) {
+        console.log('DATA SENT', chId, peerId, data)
+        this.peers[i].dataChannels[chId].send(data)
+        break
       }
     }
   }
