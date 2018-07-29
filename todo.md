@@ -1,6 +1,7 @@
 To fix:
 * handle situations when _iceConnectionState_ 'checking' lasts too long
 and results in 'failed' seen after watchdog is dead
+* iOS header
 * 
 
 To add:

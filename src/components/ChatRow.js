@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native'
+import { View, Text, StyleSheet, TouchableOpacity, Platform } from 'react-native'
 import Theme from 'config/theme'
 
 export default class ChatRow extends Component {
@@ -59,6 +59,6 @@ const styles = StyleSheet.create({
   nameText: {
     fontSize: 15,
     color: Theme.black,
-    fontFamily: 'sans-serif-light', // TODO: ios
+    fontFamily: Platform.select({android: 'sans-serif-light'}),
   },
 })
