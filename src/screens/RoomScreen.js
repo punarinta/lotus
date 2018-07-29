@@ -125,10 +125,10 @@ export default class RoomScreen extends Component {
       }
       if (pc.iceConnectionState === 'checking') {
         // restart watchdog
-        if (this.peers[peerId].watchdog) {
-          clearTimeout(this.peers[peerId].watchdog)
+        if (pc.watchdog) {
+          clearTimeout(pc.watchdog)
         }
-        this.peers[peerId].watchdog = setTimeout(() => this.peers[peerId].watchdogFunction, 5000)
+        pc.watchdog = setTimeout(pc.watchdogFunction, 5000)
       }
     }
 
@@ -240,7 +240,7 @@ export default class RoomScreen extends Component {
       console.log('Adding candidates...')
 
       if (!this.peers[peerId].watchdog) {
-        this.peers[peerId].watchdog = setTimeout(() => this.peers[peerId].watchdogFunction, 5000)
+        this.peers[peerId].watchdog = setTimeout(this.peers[peerId].watchdogFunction, 5000)
       }
 
       for (const c of data.candidates) {
