@@ -7,8 +7,6 @@ import SendSvg from './svg/Send'
 // Messenger should take care of asyncstorage data I/O
 export default class Messenger extends Component {
 
-  toPost = ''
-
   static defaultProps = {
     onNewData: () => null,
   }
@@ -16,7 +14,7 @@ export default class Messenger extends Component {
   state = {
     messages: [{body: 'My message', userId:null},{body: 'His message', userId:'usr'}],
     msgsRenderState: null,
-    clearPostbox: false,
+    toPost: '',
   }
 
   addMessage = (message, userId = null) => {
@@ -37,27 +35,18 @@ export default class Messenger extends Component {
   }
 
   post = () => {
-    const msg = this.toPost
+    const { toPost } = this.state
 
-    if (msg.length) {
-      this.addMessage(msg)
-      this.props.onNewData(0, null, msg)
-      this.toPost = ''
-      this.setState({clearPostbox: true})
+    if (toPost.length) {
+      this.addMessage(toPost)
+      this.props.onNewData(0, null, toPost)
+      this.setState({clearPostbox: true, toPost: ''})
       this.refs.msgs.scrollToEnd()
     }
   }
 
   render() {
-    const { messages, clearPostbox, msgsRenderState } = this.state
-
-    let more = {}
-    if (clearPostbox) {
-      this.setState({clearPostbox: false})
-      more.value = ''
-    }
-
-    console.log('render', more.value)
+    const { messages, msgsRenderState, toPost } = this.state
 
     return (
       <KeyboardAvoidingView
@@ -77,14 +66,14 @@ export default class Messenger extends Component {
           <TextInput
             onSubmitEditing={this.post}
             blurOnSubmit={false}
-            onChangeText={ post => this.toPost = post}
+            onChangeText={ toPost => this.setState({toPost})}
             style={styles.postbox}
+            value={toPost}
             selectionColor={Theme.black}
-            {...more}
           />
           <View style={styles.postButtons}>
-            <TouchableOpacity onPress={this.post}>
-              <SendSvg color={Theme.black}/>
+            <TouchableOpacity onPress={this.post} activeOpacity={toPost.length ? 0.5 : 1}>
+              <SendSvg color={toPost.length ? Theme.black : Theme.gray}/>
             </TouchableOpacity>
           </View>
         </View>
