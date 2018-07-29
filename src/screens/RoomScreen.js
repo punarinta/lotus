@@ -85,6 +85,7 @@ export default class RoomScreen extends Component {
     let candyWatch = null
     this.setState({connState: '?'})
     pc.iWillRetry = isOffer
+    pc.dataChannels = []
 
     pc.onicecandidate = (event) => {
       console.log('SIGNAL icecandidate')
@@ -115,11 +116,19 @@ export default class RoomScreen extends Component {
       this.setState({connState: pc.iceConnectionState})
       console.log('SIGNAL oniceconnectionstatechange', pc.iceConnectionState , peerId)
       if (['failed','closed','disconnected'].includes(pc.iceConnectionState)) {
+        pc.dataChannels.forEach(ch => ch.close())
       }
       if (pc.iceConnectionState === 'connected') {
         if (this.peers[peerId].watchdog) {
           clearTimeout(this.peers[peerId].watchdog)
         }
+
+        ['text', 'aux'].forEach((chName, i) => {
+          const ch = pc.createDataChannel(chName, { negotiated: true, id: i })
+          ch.onmessage = (event) => this.onDataRead(i, peerId, event.data)
+          ch.onclose = () => console.log('Channel closed', i, peerId)
+          pc.dataChannels[i] = ch
+        })
       }
     }
 
@@ -145,13 +154,6 @@ export default class RoomScreen extends Component {
         }
       }
     }
-
-    ['text', 'aux'].forEach((chName, i) => {
-      const ch = pc.createDataChannel(chName, { negotiated: true, id: i })
-      ch.onmessage = (event) => this.onDataRead(i, peerId, event.data)
-      if (!pc.dataChannels) pc.dataChannels = []
-      pc.dataChannels[i] = ch
-    })
 
     this.peers[peerId] = pc
 
@@ -223,9 +225,7 @@ export default class RoomScreen extends Component {
         this.peers[peerId].watchdog = setTimeout(() => {
           console.log('Watchdog fired for state ' + this.state.connState)
           if (['failed', 'closed', 'disconnected', '?'].includes(this.state.connState) && pc.iWillRetry) {
-            this.peers[peerId].dataChannels.forEach(ch => ch.close())
             this.peers[peerId].close()
-          //  delete this.peers[peerId]
             this.peers.splice(peerId, 1)
             console.log('Retrying for peer ' + peerId)
             this.createPC(peerId, true)
