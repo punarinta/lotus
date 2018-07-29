@@ -28,7 +28,7 @@ const AppNavigator = StackNavigator(RoutesConfig, {
     },
   }),
   cardStyle: {
-    backgroundColor: Theme.black,
+    backgroundColor: Theme.white,
   },
 })
 

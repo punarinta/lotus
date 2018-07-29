@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { View, Text, StyleSheet, Dimensions, TouchableOpacity, DeviceEventEmitter } from 'react-native'
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native'
 import { RTCPeerConnection, RTCIceCandidate, RTCSessionDescription } from 'react-native-webrtc'
 import { NavigationActions, StackActions } from 'react-navigation'
 import Theme from 'config/theme'
@@ -8,6 +8,8 @@ import Messenger from 'components/Messenger'
 import AVModal from 'modals/AVModal'
 import { ProfileSvc } from 'services/profile'
 import I18n from 'i18n'
+import { sha256 } from 'js-sha256'
+import HomeSvg from 'components/svg/Home'
 
 const webRTCConfig = {'iceServers': [{'urls': 'stun:stun.services.mozilla.com'}, {'urls': 'stun:stun.l.google.com:19302'}]}
 
@@ -30,14 +32,18 @@ export default class RoomScreen extends Component {
   }
 
   initPubSub = async () => {
-    if (!this.navParams.peer) {
+    if (!this.navParams.peer || !$.accounts[0] || !$.accounts[0].email) {
       return false
     }
 
-    // TODO: support more than one peer -> change chat ID
-    this.pubsub = new PubSub(false, '46.101.117.47', '/lotus', 'ch-' + this.navParams.peer)
+    const
+      hash1 = sha256($.accounts[0].email).substring(0, 32),
+      hash2 = sha256(this.navParams.peer).substring(0, 32),
+      bool = $.accounts[0].email > this.navParams.peer
 
-    if (! await this.pubsub.init()) {
+    this.pubsub = new PubSub(false, '46.101.117.47', '/lotus', bool ? hash1 + hash2 : hash2 + hash1)
+
+    if (!await this.pubsub.init()) {
       console.log('PubSub server connection failure')
       return false
     }
@@ -54,7 +60,7 @@ export default class RoomScreen extends Component {
 
     this.peers = {}
     if (!this.pubsub) {
-      if (! await this.initPubSub()) {
+      if (!await this.initPubSub()) {
         return false
       }
     }
@@ -114,8 +120,8 @@ export default class RoomScreen extends Component {
 
     pc.oniceconnectionstatechange = () => {
       this.setState({connState: pc.iceConnectionState})
-      console.log('SIGNAL oniceconnectionstatechange', pc.iceConnectionState , peerId)
-      if (['failed','closed','disconnected'].includes(pc.iceConnectionState)) {
+      console.log('SIGNAL oniceconnectionstatechange', pc.iceConnectionState, peerId)
+      if (['failed', 'closed', 'disconnected'].includes(pc.iceConnectionState)) {
         pc.dataChannels.forEach(ch => ch.close())
       }
       if (pc.iceConnectionState === 'connected') {
@@ -134,21 +140,21 @@ export default class RoomScreen extends Component {
 
     pc.onaddstream = event => {
       console.log('SIGNAL addstream')
-      const { remoteStreams, isAVOn } = this.state
+      const {remoteStreams, isAVOn} = this.state
       if (!isAVOn) {
         // TODO: inform me about an incoming and if I accept, open AV modal and add a stream
       } else {
         remoteStreams[peerId] = event.stream
-        this.setState({ remoteStreams })
+        this.setState({remoteStreams})
       }
     }
 
     pc.onremovestream = event => {
-      const { remoteStreams } = this.state
+      const {remoteStreams} = this.state
       for (const i in remoteStreams) {
         if (remoteStreams[i] === event.stream) {
           delete remoteStreams[i]
-          this.setState({ remoteStreams })
+          this.setState({remoteStreams})
           break
         }
       }
@@ -169,7 +175,7 @@ export default class RoomScreen extends Component {
     }
 
     ['text', 'aux'].forEach((chName, i) => {
-      const ch = pc.createDataChannel(chName, { negotiated: true, id: i })
+      const ch = pc.createDataChannel(chName, {negotiated: true, id: i})
       ch.onmessage = (event) => this.onDataRead(i, peerId, event.data)
       pc.dataChannels[i] = ch
     })
@@ -266,36 +272,41 @@ export default class RoomScreen extends Component {
     this.props.navigation.dispatch(StackActions.reset
     ({
       index: 0,
-      actions: [NavigationActions.navigate({ routeName: 'Home'})]
+      actions: [NavigationActions.navigate({routeName: 'Home'})]
     }))
   }
 
   render() {
-    const { remoteStreams, isAVOn } = this.state
+    const {remoteStreams, isAVOn} = this.state
 
-    return (<View style={styles.container}>
-      <TouchableOpacity
-        style={{height: 64, backgroundColor: 'yellow'}}
-        onPress={() => this.props.navigation.goBack()}
-      >
-        <Text>{ this.state.connState }</Text>
-      </TouchableOpacity>
-      <Messenger
-        ref="msg"
-        onNewData={this.dataSend}
-      />
-      {
-        isAVOn && <AVModal
-          ref="av"
-          remoteStreams={remoteStreams}
-          onStreamChange={this.onStreamChange}
+    return (
+      <View style={styles.container}>
+        <View style={styles.navBar}>
+          <TouchableOpacity
+            style={styles.navButton}
+            onPress={() => this.props.navigation.goBack()}
+          >
+            <HomeSvg/>
+          </TouchableOpacity>
+          <Text style={{color: Theme.black, paddingLeft: 16}}>
+            Connection state: {this.state.connState}
+          </Text>
+        </View>
+        <Messenger
+          ref="msg"
+          onNewData={this.dataSend}
         />
-      }
-    </View>)
+        {
+          isAVOn && <AVModal
+            ref="av"
+            remoteStreams={remoteStreams}
+            onStreamChange={this.onStreamChange}
+          />
+        }
+      </View>
+    )
   }
 }
-
-const { height } = Dimensions.get('window')
 
 const styles = StyleSheet.create({
   container: {
@@ -305,5 +316,22 @@ const styles = StyleSheet.create({
     fontSize: Theme.uiFontSize,
     textAlign: 'center',
     margin: 10,
+    color: Theme.white,
   },
+  navBar: {
+    height: 48,
+    flexDirection: 'row',
+    backgroundColor: Theme.white,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: Theme.black,
+    alignItems: 'center',
+  },
+  navButton: {
+    width: 48,
+    height: 48,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRightColor: Theme.black,
+    borderRightWidth: StyleSheet.hairlineWidth,
+  }
 })

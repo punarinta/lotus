@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
-import { View, ActivityIndicator, Platform } from 'react-native'
+import { View, ActivityIndicator, Platform, StyleSheet } from 'react-native'
 import Theme from 'config/theme'
 
 export default class Loader extends Component {
@@ -24,7 +24,7 @@ export default class Loader extends Component {
               animating={true}
               size="large"
               style={styles.loader}
-              color={Theme.white}
+              color={Theme.black}
             /> : null
         }
       </View>
@@ -32,19 +32,22 @@ export default class Loader extends Component {
   }
 }
 
-const styles = {
+const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  loader: [{
+  loader: {
     height: 64,
     width: 64,
-    backgroundColor: Theme.gray,
+    backgroundColor: Theme.white,
+    borderColor: Theme.black,
+    borderWidth: StyleSheet.hairlineWidth,
     borderRadius: 32,
-  }, Platform.OS === 'ios' ? {
-    paddingTop: 4,
-    paddingLeft: 3,
-  } : {}]
-}
+    ...Platform.select({ios: {
+      paddingTop: 4,
+      paddingLeft: 3,
+    }})
+  }
+})

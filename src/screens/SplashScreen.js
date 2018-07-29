@@ -3,7 +3,7 @@ import PropTypes from 'prop-types'
 import store from 'core/store'
 import Loader from 'components/Loader'
 import { NavigationActions, StackActions } from 'react-navigation'
-import { StatusBar } from 'react-native'
+import { StatusBar, Platform } from 'react-native'
 import I18n from 'i18n'
 import { SysSvc } from 'services/sys'
 import { FcmSvc } from 'services/fcm'
@@ -44,7 +44,7 @@ export default class SplashScreen extends Component {
     } else {
     }
 
-    await store.init({persist:['phonebook']})
+    await store.init({persist:['phonebook', 'emails', 'accounts']})
 
     // set default values
     window.$ = Object.assign({
@@ -52,7 +52,11 @@ export default class SplashScreen extends Component {
       resetNavigationTo: this.resetNavigationTo,
       sessionId: Math.random(),
       phonebook: {},
+      accounts: [],
     }, $)
+
+    // TODO: remove before release
+    $.accounts = [Platform.OS === 'ios' ? {email: 'ios@lotus.test'} : {email: 'android@lotus.test'}]
 
     I18n.init('en_US')
 

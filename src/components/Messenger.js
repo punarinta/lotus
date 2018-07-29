@@ -2,18 +2,21 @@ import React, { Component } from 'react'
 import { View, StyleSheet, TextInput, FlatList, TouchableOpacity, Text } from 'react-native'
 import Theme from 'config/theme'
 import MessageRow from './MessageRow'
+import SendSvg from './svg/Send'
 
 // Messenger should take care of asyncstorage data I/O
 export default class Messenger extends Component {
+
+  toPost = ''
 
   static defaultProps = {
     onNewData: () => null,
   }
 
   state = {
-    messages: [],
-    toPost: '',
+    messages: [{body: 'My message', userId:null},{body: 'His message', userId:'usr'}],
     msgsRenderState: null,
+    clearPostbox: false,
   }
 
   addMessage = (message, userId = null) => {
@@ -33,12 +36,33 @@ export default class Messenger extends Component {
     }
   }
 
+  post = () => {
+    const msg = this.toPost
+
+    if (msg.length) {
+      this.addMessage(msg)
+      this.props.onNewData(0, null, msg)
+      this.toPost = ''
+      this.setState({clearPostbox: true})
+      this.refs.msgs.scrollToEnd()
+    }
+  }
+
   render() {
-    const { messages, toPost, msgsRenderState } = this.state
+    const { messages, clearPostbox, msgsRenderState } = this.state
+
+    let more = {}
+    if (clearPostbox) {
+      this.setState({clearPostbox: false})
+      more.value = ''
+    }
+
+    console.log('render')
 
     return (
       <View style={styles.container}>
         <FlatList
+          ref="msgs"
           style={styles.msgs}
           data={messages}
           renderItem={(item) => <MessageRow {...item.item}/>}
@@ -46,26 +70,22 @@ export default class Messenger extends Component {
           keyExtractor={(item, index) => index + ''}
         />
 
-        <TextInput
-          ref="postbox"
-          onChangeText={(toPost) => {
-            this.setState({toPost})
-          }}
-          value={toPost}
-          style={styles.postbox}
-        />
-        <TouchableOpacity
-          onPress={() => {
-            this.addMessage(toPost)
-            this.props.onNewData(0, null, toPost)
-            this.setState({toPost: ''})
-            if (this.refs.postbox) this.refs.postbox.clear()
-          }}
-        >
-          <Text>SEND</Text>
-          <Text>SEND</Text>
-        </TouchableOpacity>
-      </View>
+        <View style={styles.bottomBar}>
+          <TextInput
+            onSubmitEditing={this.post}
+            blurOnSubmit={false}
+            onChangeText={ post => this.toPost = post}
+            style={styles.postbox}
+            selectionColor={Theme.black}
+            {...more}
+          />
+          <View style={styles.postButtons}>
+            <TouchableOpacity onPress={this.post}>
+              <SendSvg color={Theme.black}/>
+            </TouchableOpacity>
+          </View>
+        </View>
+       </View>
     )
   }
 }
@@ -77,9 +97,21 @@ const styles = StyleSheet.create({
   },
   msgs: {
     flex: 1,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: Theme.black,
+  },
+  bottomBar: {
+    flexDirection: 'row',
   },
   postbox: {
-    backgroundColor: '#fff',
+    backgroundColor: Theme.white,
     height: 48,
+    flex: 1,
+  },
+  postButtons: {
+    backgroundColor: Theme.white,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 8,
   },
 })

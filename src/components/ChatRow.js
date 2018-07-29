@@ -43,7 +43,9 @@ const styles = StyleSheet.create({
   ava: {
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: Theme.gray,
+    backgroundColor: Theme.white,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: Theme.black,
     borderRadius: 44,
     height: 44,
     width: 44,
@@ -52,7 +54,7 @@ const styles = StyleSheet.create({
     elevation: 3, // android
   },
   avaText: {
-    color: Theme.white,
+    color: Theme.black,
     fontSize: 18,
     paddingBottom: 2,
   },
