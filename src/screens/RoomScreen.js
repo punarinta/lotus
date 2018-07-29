@@ -123,6 +123,13 @@ export default class RoomScreen extends Component {
           clearTimeout(this.peers[peerId].watchdog)
         }
       }
+      if (pc.iceConnectionState === 'checking') {
+        // restart watchdog
+        if (this.peers[peerId].watchdog) {
+          clearTimeout(this.peers[peerId].watchdog)
+        }
+        this.peers[peerId].watchdog = setTimeout(() => this.peers[peerId].watchdogFunction, 5000)
+      }
     }
 
     pc.onaddstream = event => {
@@ -149,6 +156,16 @@ export default class RoomScreen extends Component {
 
     pc.ondatachannel = (event) => {
       console.log('ondatachannel fired for', peerId, event.channel)
+    }
+
+    pc.watchdogFunction = () => {
+      console.log('Watchdog fired for state ' + this.state.connState)
+      if (['failed', 'closed', 'disconnected', '?'].includes(this.state.connState) && pc.iWillRetry) {
+        this.peers[peerId].close()
+        delete this.peers[peerId]
+        console.log('Retrying for peer ' + peerId)
+        this.createPC(peerId, true)
+      }
     }
 
     ['text', 'aux'].forEach((chName, i) => {
@@ -223,15 +240,7 @@ export default class RoomScreen extends Component {
       console.log('Adding candidates...')
 
       if (!this.peers[peerId].watchdog) {
-        this.peers[peerId].watchdog = setTimeout(() => {
-          console.log('Watchdog fired for state ' + this.state.connState)
-          if (['failed', 'closed', 'disconnected', '?'].includes(this.state.connState) && pc.iWillRetry) {
-            this.peers[peerId].close()
-            delete this.peers[peerId]
-            console.log('Retrying for peer ' + peerId)
-            this.createPC(peerId, true)
-          }
-        }, 5000)
+        this.peers[peerId].watchdog = setTimeout(() => this.peers[peerId].watchdogFunction, 5000)
       }
 
       for (const c of data.candidates) {
