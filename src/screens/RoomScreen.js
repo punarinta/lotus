@@ -80,6 +80,8 @@ export default class RoomScreen extends Component {
 
   createPC = (peerId, isOffer) => {
     const pc = new RTCPeerConnection(webRTCConfig)
+    this.peers[peerId] = pc
+
     let candidates = []
     let candyWatch = null
     this.setState({connState: '?'})
@@ -147,10 +149,9 @@ export default class RoomScreen extends Component {
     ['text', 'aux'].forEach((chName, i) => {
       const ch = pc.createDataChannel(chName, { negotiated: true, id: i })
       ch.onmessage = (event) => this.onDataRead(i, peerId, event.data)
+      if (!pc.dataChannels) pc.dataChannels = []
       pc.dataChannels[i] = ch
     })
-
-    this.peers[peerId] = pc
 
     console.log('PC created with ' + peerId)
 
@@ -259,19 +260,24 @@ export default class RoomScreen extends Component {
   render() {
     const { remoteStreams, isAVOn } = this.state
 
-    return [
-      isAVOn && <AVModal
-        key="av"
-        ref="av"
-        remoteStreams={remoteStreams}
-        onStreamChange={this.onStreamChange}
-      />,
+    return (<View>
+      <TouchableOpacity
+        onPress={() => this.props.navigation.goBack()}
+      >
+        <Text>BACK</Text>
+      </TouchableOpacity>
       <Messenger
-        key="msg"
         ref="msg"
         onNewData={this.dataSend}
       />
-    ]
+      {
+        isAVOn && <AVModal
+          ref="av"
+          remoteStreams={remoteStreams}
+          onStreamChange={this.onStreamChange}
+        />
+      }
+    </View>)
   }
 }
 

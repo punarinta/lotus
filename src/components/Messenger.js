@@ -29,12 +29,12 @@ export default class Messenger extends Component {
 
     return (
       <View style={styles.container}>
-          <FlatList
-            style={styles.msgs}
-            data={messages}
-            renderItem={(item) => <MessageRow {...item.item}/>}
-            keyExtractor={(item, index) => index + ''}
-          />
+        <FlatList
+          style={styles.msgs}
+          data={messages}
+          renderItem={(item) => <MessageRow {...item.item}/>}
+          keyExtractor={(item, index) => index + ''}
+        />
 
         <TextInput
           ref="postbox"
