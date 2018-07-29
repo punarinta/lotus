@@ -13,20 +13,25 @@ export default class Messenger extends Component {
   state = {
     messages: [{body: 'M1'},{body: 'M2'},],
     toPost: '',
+    msgsRenderState: null,
+  }
+
+  addMessage = (message) => {
+    const { messages } = this.state
+    messages.push({body: message})
+    this.setState({messages, msgsRenderState: Math.random()})
   }
 
   takeData(chId, peerId, data) {
-    const { messages } = this.state
     if (chId === 0) {
       console.log('Push message', data)
       // text message incoming
-      messages.push({body: data})
-      this.setState({messages})
+      this.addMessage(data)
     }
   }
 
   render() {
-    const { messages, toPost } = this.state
+    const { messages, toPost, msgsRenderState } = this.state
 
     return (
       <View style={styles.container}>
@@ -34,6 +39,7 @@ export default class Messenger extends Component {
           style={styles.msgs}
           data={messages}
           renderItem={(item) => <MessageRow {...item.item}/>}
+          extraData={msgsRenderState}
         />
 
         <TextInput
@@ -46,9 +52,9 @@ export default class Messenger extends Component {
         />
         <TouchableOpacity
           onPress={() => {
-            messages.push({body: toPost})
+            this.addMessage(toPost)
             this.props.onNewData(0, null, toPost)
-            this.setState({messages, toPost: ''})
+            this.setState({toPost: ''})
             if (this.refs.postbox) this.refs.postbox.clear()
           }}
         >
