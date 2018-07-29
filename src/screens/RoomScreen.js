@@ -179,7 +179,6 @@ export default class RoomScreen extends Component {
       if (peerId === null || i === peerId) {
         console.log('DATA SENT', chId, peerId, data)
         this.peers[i].dataChannels[chId].send(data)
-        break
       }
     }
   }
@@ -216,7 +215,7 @@ export default class RoomScreen extends Component {
   }
 
   exchange = async (data) => {
-    console.log('EVENT exchange', data)
+    // console.log('EVENT exchange', data)
     const peerId = data.rtcFrom
     const pc = this.peers[peerId] ? this.peers[peerId] : this.createPC(peerId, false)
 
