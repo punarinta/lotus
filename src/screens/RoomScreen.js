@@ -151,6 +151,7 @@ export default class RoomScreen extends Component {
       const ch = pc.createDataChannel(chName, { negotiated: true, id: i })
       ch.onmessage = (event) => this.onDataRead(i, peerId, event.data)
       ch.onclose = () => console.log('Channel closed', i, peerId)
+      ch.onopen = () => console.log('Channel opened', i, peerId)
       pc.dataChannels[i] = ch
     })
 
