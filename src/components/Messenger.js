@@ -11,14 +11,17 @@ export default class Messenger extends Component {
   }
 
   state = {
-    messages: [{body: 'M1'},{body: 'M2'},],
+    messages: [],
     toPost: '',
     msgsRenderState: null,
   }
 
-  addMessage = (message) => {
+  addMessage = (message, userId = null) => {
     const { messages } = this.state
-    messages.push({body: message})
+    messages.push({
+      body: message,
+      userId,
+    })
     this.setState({messages, msgsRenderState: Math.random()})
   }
 
@@ -26,7 +29,7 @@ export default class Messenger extends Component {
     if (chId === 0) {
       console.log('Push message', data)
       // text message incoming
-      this.addMessage(data)
+      this.addMessage(data, peerId)
     }
   }
 
@@ -40,6 +43,7 @@ export default class Messenger extends Component {
           data={messages}
           renderItem={(item) => <MessageRow {...item.item}/>}
           extraData={msgsRenderState}
+          keyExtractor={(item, index) => index + ''}
         />
 
         <TextInput

@@ -138,7 +138,8 @@ export default class RoomScreen extends Component {
       const { remoteStreams } = this.state
       for (const i in remoteStreams) {
         if (remoteStreams[i] === event.stream) {
-          delete remoteStreams[i]
+          // delete remoteStreams[i]
+          remoteStreams.splice(i, 1)
           this.setState({ remoteStreams })
           break
         }
@@ -222,8 +223,10 @@ export default class RoomScreen extends Component {
         this.peers[peerId].watchdog = setTimeout(() => {
           console.log('Watchdog fired for state ' + this.state.connState)
           if (['failed', 'closed', 'disconnected', '?'].includes(this.state.connState) && pc.iWillRetry) {
+            this.peers[peerId].dataChannels.forEach(ch => ch.close())
             this.peers[peerId].close()
-            delete this.peers[peerId]
+          //  delete this.peers[peerId]
+            this.peers.splice(peerId, 1)
             console.log('Retrying for peer ' + peerId)
             this.createPC(peerId, true)
           }

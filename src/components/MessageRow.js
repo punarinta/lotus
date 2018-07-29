@@ -6,12 +6,13 @@ export default class MessageRow extends Component {
 
   static defaultProps = {
     body: '',
+    userId: null,
   }
 
   render() {
     return (
       <View style={styles.container}>
-        <Text>{ this.props.body }</Text>
+        <Text>{ this.props.userId || 'me' }: { this.props.body }</Text>
       </View>
     )
   }
