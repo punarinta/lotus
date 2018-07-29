@@ -161,7 +161,7 @@ export default class RoomScreen extends Component {
     pc.watchdogFunction = () => {
       console.log('Watchdog fired for state ' + this.state.connState)
       if (['failed', 'closed', 'disconnected', '?'].includes(this.state.connState) && pc.iWillRetry) {
-        this.peers[peerId].close()
+        pc.close()
         delete this.peers[peerId]
         console.log('Retrying for peer ' + peerId)
         this.createPC(peerId, true)
