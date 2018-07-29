@@ -1,10 +1,14 @@
 import React, { Component } from 'react'
-import { View, StyleSheet, TouchableOpacity } from 'react-native'
+import {View, StyleSheet, TouchableOpacity, Platform} from 'react-native'
 import ChatsList from 'components/ChatsList'
 import Theme from 'config/theme'
 import GroupAddSvg from 'components/svg/GroupAdd'
 
 const sampleChats = [
+  {
+    id: Platform.OS === 'ios' ? 'android@lotus.test' : 'ios@lotus.test',
+    name: Platform.OS === 'ios' ? 'Android phone' : 'iOS phone'
+  },
   {
     id: 'john.doe@mail.test',
     name: 'John Doe',
