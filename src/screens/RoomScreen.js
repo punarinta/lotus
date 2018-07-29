@@ -122,13 +122,6 @@ export default class RoomScreen extends Component {
         if (this.peers[peerId].watchdog) {
           clearTimeout(this.peers[peerId].watchdog)
         }
-
-        ['text', 'aux'].forEach((chName, i) => {
-          const ch = pc.createDataChannel(chName, { negotiated: true, id: i })
-          ch.onmessage = (event) => this.onDataRead(i, peerId, event.data)
-          ch.onclose = () => console.log('Channel closed', i, peerId)
-          pc.dataChannels[i] = ch
-        })
       }
     }
 
@@ -154,6 +147,13 @@ export default class RoomScreen extends Component {
         }
       }
     }
+
+    ['text', 'aux'].forEach((chName, i) => {
+      const ch = pc.createDataChannel(chName, { negotiated: true, id: i })
+      ch.onmessage = (event) => this.onDataRead(i, peerId, event.data)
+      ch.onclose = () => console.log('Channel closed', i, peerId)
+      pc.dataChannels[i] = ch
+    })
 
     this.peers[peerId] = pc
 
