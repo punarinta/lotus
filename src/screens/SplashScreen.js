@@ -30,8 +30,8 @@ export default class SplashScreen extends Component {
 
   async componentWillMount() {
 
-    StatusBar.setBarStyle('light-content')
-    StatusBar.setBackgroundColor(Theme.gray)
+    StatusBar.setBarStyle('dark-content')
+    StatusBar.setBackgroundColor(Theme.white)
 
     const enabled = await firebase.messaging().hasPermission()
 

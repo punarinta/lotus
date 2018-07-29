@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import { StackNavigator } from 'react-navigation'
-import { Animated, Easing } from 'react-native'
+import { Animated, Easing, Platform } from 'react-native'
 import RoutesConfig from 'config/routes'
 import MessageBox from 'modals/MessageBox'
 import Theme from 'config/theme'
@@ -29,6 +29,11 @@ const AppNavigator = StackNavigator(RoutesConfig, {
   }),
   cardStyle: {
     backgroundColor: Theme.white,
+    ...Platform.select({
+      'ios': {
+        paddingTop: 20,
+      }
+    })
   },
 })
 

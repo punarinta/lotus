@@ -288,7 +288,7 @@ export default class RoomScreen extends Component {
           >
             <HomeSvg/>
           </TouchableOpacity>
-          <Text style={{color: Theme.black, paddingLeft: 16}}>
+          <Text style={{color: Theme.black}}>
             Connection state: {this.state.connState}
           </Text>
         </View>
@@ -331,7 +331,7 @@ const styles = StyleSheet.create({
     height: 48,
     justifyContent: 'center',
     alignItems: 'center',
-    borderRightColor: Theme.black,
-    borderRightWidth: StyleSheet.hairlineWidth,
+    //borderRightColor: Theme.black,
+    //borderRightWidth: StyleSheet.hairlineWidth,
   }
 })
