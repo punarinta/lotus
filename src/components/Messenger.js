@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { View, StyleSheet, TextInput, FlatList, TouchableOpacity } from 'react-native'
+import { View, StyleSheet, TextInput, FlatList, TouchableOpacity, KeyboardAvoidingView, Platform } from 'react-native'
 import Theme from 'config/theme'
 import MessageRow from './MessageRow'
 import SendSvg from './svg/Send'
@@ -57,10 +57,13 @@ export default class Messenger extends Component {
       more.value = ''
     }
 
-    console.log('render')
+    console.log('render', more.value)
 
     return (
-      <View style={styles.container}>
+      <KeyboardAvoidingView
+        style={styles.container}
+        {...Platform.select({'ios': {behavior:'padding', keyboardVerticalOffset:20}})}
+      >
         <FlatList
           ref="msgs"
           style={styles.msgs}
@@ -85,7 +88,7 @@ export default class Messenger extends Component {
             </TouchableOpacity>
           </View>
         </View>
-       </View>
+       </KeyboardAvoidingView>
     )
   }
 }
