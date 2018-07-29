@@ -171,6 +171,9 @@ export default class RoomScreen extends Component {
   }
 
   onDataRead = (chId, peerId, data) => {
+
+    console.log('DATA READ', chId, peerId, data)
+
     // hardcode data channel subscribers
     if (this.refs.msg) this.refs.msg.takeData(chId, peerId, data)
     // if (this.refs.skt) this.refs.skt.takeData(chId, peerId, data)

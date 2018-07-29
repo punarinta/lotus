@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { View, StyleSheet, TextInput, FlatList } from 'react-native'
+import { View, StyleSheet, TextInput, FlatList, TouchableOpacity, Text } from 'react-native'
 import Theme from 'config/theme'
 import MessageRow from './MessageRow'
 
@@ -11,13 +11,14 @@ export default class Messenger extends Component {
   }
 
   state = {
-    messages: [{body: 'Hi!'}],
+    messages: [{body: 'M1'},{body: 'M2'},],
     toPost: '',
   }
 
   takeData(chId, peerId, data) {
     const { messages } = this.state
     if (chId === 0) {
+      console.log('Push message', data)
       // text message incoming
       messages.push({body: data})
       this.setState({messages})
@@ -33,7 +34,6 @@ export default class Messenger extends Component {
           style={styles.msgs}
           data={messages}
           renderItem={(item) => <MessageRow {...item.item}/>}
-          keyExtractor={(item, index) => index + ''}
         />
 
         <TextInput
@@ -41,14 +41,20 @@ export default class Messenger extends Component {
           onChangeText={(toPost) => {
             this.setState({toPost})
           }}
-          onSubmitEditing={() => {
+          value={toPost}
+          style={styles.postbox}
+        />
+        <TouchableOpacity
+          onPress={() => {
             messages.push({body: toPost})
             this.props.onNewData(0, null, toPost)
             this.setState({messages, toPost: ''})
             if (this.refs.postbox) this.refs.postbox.clear()
           }}
-          style={styles.postbox}
-        />
+        >
+          <Text>SEND</Text>
+          <Text>SEND</Text>
+        </TouchableOpacity>
       </View>
     )
   }
