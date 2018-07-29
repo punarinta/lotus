@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { View, Text, StyleSheet, Dimensions, TouchableOpacity } from 'react-native'
+import { View, Text, StyleSheet, Dimensions, TouchableOpacity, DeviceEventEmitter } from 'react-native'
 import { RTCPeerConnection, RTCIceCandidate, RTCSessionDescription } from 'react-native-webrtc'
 import { NavigationActions, StackActions } from 'react-navigation'
 import Theme from 'config/theme'
@@ -52,6 +52,8 @@ export default class RoomScreen extends Component {
 
   async componentDidMount() {
 
+    DeviceEventEmitter.addListener('datachannel', this.justListen)
+
     this.peers = {}
     if (!this.pubsub) {
       if (! await this.initPubSub()) {
@@ -64,7 +66,12 @@ export default class RoomScreen extends Component {
   }
 
   componentWillUnmount() {
+    DeviceEventEmitter.removeListener('datachannel', this.justListen)
     this.leaveChat()
+  }
+
+  justListen = (event) => {
+    console.log('justListen FIRED')
   }
 
   onStreamChange = (state, stream = null, callback = () => null) => {
@@ -145,6 +152,10 @@ export default class RoomScreen extends Component {
           break
         }
       }
+    }
+
+    pc.ondatachannel = (event) => {
+      console.log('ondatachannel fired for', peerId, event.channel)
     }
 
     ['text', 'aux'].forEach((chName, i) => {
