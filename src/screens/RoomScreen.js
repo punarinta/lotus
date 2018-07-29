@@ -35,7 +35,7 @@ export default class RoomScreen extends Component {
     }
 
     // TODO: support more than one peer -> change chat ID
-    this.pubsub = new PubSub(false, '46.101.117.47', '/lotus', 'ch-' + this.navParams.peer.replace('@', '-at-'))
+    this.pubsub = new PubSub(false, '46.101.117.47', '/lotus', 'ch-' + this.navParams.peer)
 
     if (! await this.pubsub.init()) {
       console.log('PubSub server connection failure')
@@ -52,8 +52,6 @@ export default class RoomScreen extends Component {
 
   async componentDidMount() {
 
-    DeviceEventEmitter.addListener('datachannel', this.justListen)
-
     this.peers = {}
     if (!this.pubsub) {
       if (! await this.initPubSub()) {
@@ -66,12 +64,7 @@ export default class RoomScreen extends Component {
   }
 
   componentWillUnmount() {
-    DeviceEventEmitter.removeListener('datachannel', this.justListen)
     this.leaveChat()
-  }
-
-  justListen = (event) => {
-    console.log('justListen FIRED')
   }
 
   onStreamChange = (state, stream = null, callback = () => null) => {
@@ -161,8 +154,6 @@ export default class RoomScreen extends Component {
     ['text', 'aux'].forEach((chName, i) => {
       const ch = pc.createDataChannel(chName, { negotiated: true, id: i })
       ch.onmessage = (event) => this.onDataRead(i, peerId, event.data)
-      ch.onclose = () => console.log('Channel closed', i, peerId)
-      ch.onopen = () => console.log('Channel opened', i, peerId)
       pc.dataChannels[i] = ch
     })
 

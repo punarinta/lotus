@@ -11,6 +11,7 @@ Prio features:
 * contact book (UI)
 * fetch messages posted when you were absent
 * 'last seen'
+* UI
 * 
 
 Other features:
