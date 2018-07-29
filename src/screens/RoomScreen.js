@@ -159,6 +159,9 @@ export default class RoomScreen extends Component {
   }
 
   dataSend = (chId, peerId, data) => {
+
+    console.log('DATA SENT', chId, peerId, data)
+
     if (peerId === null) {
       for (const i in this.peers) {
         if (i === peerId) {
@@ -260,11 +263,12 @@ export default class RoomScreen extends Component {
   render() {
     const { remoteStreams, isAVOn } = this.state
 
-    return (<View>
+    return (<View style={styles.container}>
       <TouchableOpacity
+        style={{height: 64, backgroundColor: 'yellow'}}
         onPress={() => this.props.navigation.goBack()}
       >
-        <Text>BACK</Text>
+        <Text>{ this.state.connState }</Text>
       </TouchableOpacity>
       <Messenger
         ref="msg"
@@ -286,10 +290,6 @@ const { height } = Dimensions.get('window')
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    paddingTop: height - Theme.globalMarginTop - Theme.navigatorHeight,
-    backgroundColor: '#000',
-    zIndex: 0,
   },
   statusText: {
     fontSize: Theme.uiFontSize,
