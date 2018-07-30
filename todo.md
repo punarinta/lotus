@@ -3,12 +3,9 @@ To fix:
 
 Prio features:
 * save last 100 messages in every chat
-* contact book (UI)
 * fetch messages posted when you were absent
-* 'last seen'
-* profile info exchange
+* add first profile dialog
 * add a chat
-* main UIs
 * 
 
 Other features:
@@ -21,4 +18,4 @@ Other features:
 * translations
 * settings page (TCP skipping)
 * update lastSeen on disconnect
-
+* 

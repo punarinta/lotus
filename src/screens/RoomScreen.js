@@ -22,8 +22,9 @@ export default class RoomScreen extends Component {
 
     this.state = {
       isAVOn: false,
-      connState: '-',
+    //  connState: 'offline',
       remoteStreams: {},
+      connStates: {},
     }
   }
 
@@ -48,8 +49,9 @@ export default class RoomScreen extends Component {
       return false
     }
 
-    this.pubsub.on('join', (remoteId) => {
-      this.createPC(remoteId, true)
+    this.pubsub.on('join', ([peerId, userId]) => {
+      ProfileSvc.update(userId, {peerId})
+      this.createPC(peerId, true)
     })
 
     this.pubsub.on('exchange', this.exchange)
@@ -66,7 +68,7 @@ export default class RoomScreen extends Component {
     }
 
     // tell everyone in the chat that you join with ID $.sessionId
-    this.pubsub.emit(null, 'join', $.sessionId)
+    this.pubsub.emit(null, 'join', [$.sessionId, $.accounts[0].email])
   }
 
   componentWillUnmount() {
@@ -84,12 +86,18 @@ export default class RoomScreen extends Component {
     }
   }
 
+  setPeerState = (peerId, newState) => {
+    const { connStates } = this.state
+    connStates[peerId] = newState
+    this.setState({connStates})
+  }
+
   createPC = (peerId, isOffer) => {
     const pc = new RTCPeerConnection(webRTCConfig)
 
     let candidates = []
     let candyWatch = null
-    this.setState({connState: '?'})
+    this.setPeerState(peerId, 'connecting')
     pc.iWillRetry = isOffer
     pc.dataChannels = []
 
@@ -121,7 +129,7 @@ export default class RoomScreen extends Component {
 
     pc.oniceconnectionstatechange = () => {
 
-      if (pc.iceConnectionState === this.state.connState) {
+      if (pc.iceConnectionState === this.state.connStates[peerId]) {
         return
       }
 
@@ -133,20 +141,26 @@ export default class RoomScreen extends Component {
         if (this.peers[peerId].watchdog) {
           clearTimeout(this.peers[peerId].watchdog)
         }
-        // send 'whoAreYou'
         this.dataSend(1, peerId, JSON.stringify({cmd: 'whoAreYou'}))
       }
       if (pc.iceConnectionState === 'checking') {
-        // restart watchdog
-        if (pc.watchdog) {
-          clearTimeout(pc.watchdog)
-        }
         if (pc.iWillRetry) {
+          if (pc.watchdog) {
+            clearTimeout(pc.watchdog)
+          }
           pc.watchdog = setTimeout(pc.watchdogFunction, 7500, true)
         }
       }
 
-      this.setState({connState: pc.iceConnectionState})
+      if (pc.iceConnectionState === 'disconnected') {
+        const peerUser = ProfileSvc.findByPeerId(peerId)
+        if (peerUser) {
+          ProfileSvc.update(peerUser.id, {lastSeen: (new Date).getTime()})
+        }
+        this.setPeerState(peerId, 'offline')
+      } else {
+        this.setPeerState(peerId, pc.iceConnectionState)
+      }
     }
 
     pc.onaddstream = event => {
@@ -176,10 +190,11 @@ export default class RoomScreen extends Component {
     }
 
     pc.watchdogFunction = (dontCompare = false) => {
-      console.log('Watchdog fired for state ' + this.state.connState)
-      if ((['failed', 'closed', 'disconnected', '?'].includes(this.state.connState) || dontCompare) && pc.iWillRetry) {
+      console.log('Watchdog fired for state ' + this.state.connStates[peerId])
+      if ((['failed', 'closed', 'connecting'].includes(this.state.connStates[peerId]) || dontCompare)) {
         pc.close()
         delete this.peers[peerId]
+        this.setPeerState(peerId, null)
         console.log('Retrying for peer ' + peerId)
         this.createPC(peerId, true)
       }
@@ -261,7 +276,7 @@ export default class RoomScreen extends Component {
     if (data.candidates) {
       console.log('Adding candidates...')
 
-      if (!this.peers[peerId].watchdog) {
+      if (!this.peers[peerId].watchdog && pc.iWillRetry) {
         this.peers[peerId].watchdog = setTimeout(this.peers[peerId].watchdogFunction, 5000)
       }
 
@@ -293,7 +308,10 @@ export default class RoomScreen extends Component {
   }
 
   render() {
-    const {remoteStreams, isAVOn} = this.state
+    const { remoteStreams, isAVOn, connStates } = this.state
+    const peerUser = ProfileSvc.get(this.navParams.peer)
+
+    console.log('WWW', connStates, peerUser)
 
     return (
       <View style={styles.container}>
@@ -304,9 +322,15 @@ export default class RoomScreen extends Component {
           >
             <HomeSvg/>
           </TouchableOpacity>
-          <Text style={styles.statusText}>
-            Connection state: {this.state.connState}
-          </Text>
+          <View>
+            <Text style={styles.nameText}>
+              { peerUser ? peerUser.name : this.navParams.peer }
+            </Text>
+            <Text style={styles.statusText}>
+              { connStates[peerUser.peerId] || 'unknown' }
+            </Text>
+          </View>
+
         </View>
         <Messenger
           ref="msg"
@@ -328,8 +352,14 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  statusText: {
+  nameText: {
+    fontSize: 12,
     color: Theme.black,
+    fontFamily: Theme.thinFont,
+  },
+  statusText: {
+    fontSize: 10,
+    color: Theme.gray,
     fontFamily: Theme.thinFont,
   },
   navBar: {

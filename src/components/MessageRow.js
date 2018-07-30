@@ -16,7 +16,7 @@ export default class MessageRow extends Component {
       <View style={[styles.container, {justifyContent: isMe ? 'flex-end' : 'flex-start'}]}>
         <View style={[styles.bubble, isMe ? styles.bblLocal : styles.bblRemote]}>
           <Text style={isMe ? styles.bodyLocal : styles.bodyRemote}>
-            { this.props.userId || 'me' }: { this.props.body }
+            { this.props.body }
           </Text>
         </View>
       </View>
@@ -36,7 +36,7 @@ const styles = StyleSheet.create({
     borderColor: Theme.gray,
     borderWidth: StyleSheet.hairlineWidth,
     backgroundColor: Theme.white,
-    //elevation: 1, // android
+    // elevation: 1, // android
   },
   bblLocal: {
     marginLeft: 64,
