@@ -97,7 +97,6 @@ export default class RoomScreen extends Component {
     if (userId) {
       ProfileSvc.update(userId, {peerId})
     }
-    console.log('RRR', peerId, isOffer, userId)
 
     let candidates = []
     let candyWatch = null
@@ -112,7 +111,7 @@ export default class RoomScreen extends Component {
 
         if (candyWatch) clearTimeout(candyWatch)
         candyWatch = setTimeout(() => {
-          console.log('Sending all candidates...')
+          console.log(`Sending ${candidates.length} candidates...`)
           this.pubsub.emit(null, 'exchange', {candidates})
           candidates = []
         }, 750)
@@ -251,7 +250,6 @@ export default class RoomScreen extends Component {
           break
 
         default:
-          console.log('Unknown command in AUX channel: ' + json.cmd)
       }
     }
   }
@@ -314,8 +312,6 @@ export default class RoomScreen extends Component {
   render() {
     const { remoteStreams, isAVOn, connStates } = this.state
     const peerUser = ProfileSvc.get(this.navParams.peer)
-
-    console.log('WWW', connStates, peerUser)
 
     return (
       <View style={styles.container}>

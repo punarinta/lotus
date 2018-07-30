@@ -16,6 +16,7 @@ Other features:
 * account switching
 * server federation (Redis and Redisless)
 * translations
-* settings page (TCP skipping)
+* settings page (TCP skipping, show-me-writing)
 * update lastSeen on disconnect
+* show when somebody is writing
 * 
