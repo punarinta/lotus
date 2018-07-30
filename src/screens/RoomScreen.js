@@ -137,7 +137,9 @@ export default class RoomScreen extends Component {
         if (pc.watchdog) {
           clearTimeout(pc.watchdog)
         }
-        pc.watchdog = setTimeout(pc.watchdogFunction, 7500, true)
+        if (pc.iWillRetry) {
+          pc.watchdog = setTimeout(pc.watchdogFunction, 7500, true)
+        }
       }
     }
 
