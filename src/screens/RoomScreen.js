@@ -221,6 +221,7 @@ export default class RoomScreen extends Component {
           // this is a short profile -- {id, name}
           const ts = (new Date).getTime()
           json.lastSeen = json.lastSync = ts
+          json.peerId = peerId
           ProfileSvc.update(json.info.email, json.info)
           break
 
