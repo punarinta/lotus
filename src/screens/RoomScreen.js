@@ -120,7 +120,11 @@ export default class RoomScreen extends Component {
     }
 
     pc.oniceconnectionstatechange = () => {
-      this.setState({connState: pc.iceConnectionState})
+
+      if (pc.iceConnectionState === this.state.connState) {
+        return
+      }
+
       console.log('SIGNAL oniceconnectionstatechange', pc.iceConnectionState, peerId)
       if (['failed', 'closed', 'disconnected'].includes(pc.iceConnectionState)) {
         pc.dataChannels.forEach(ch => ch.close())
@@ -141,6 +145,8 @@ export default class RoomScreen extends Component {
           pc.watchdog = setTimeout(pc.watchdogFunction, 7500, true)
         }
       }
+
+      this.setState({connState: pc.iceConnectionState})
     }
 
     pc.onaddstream = event => {

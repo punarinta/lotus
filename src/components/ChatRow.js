@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native'
 import Theme from 'config/theme'
+import I18n from '/i18n'
 
 export default class ChatRow extends Component {
 
@@ -12,10 +13,19 @@ export default class ChatRow extends Component {
 
   render() {
 
+    const
+      td = new Date,
+      nums = num => num > 9 ? num : '0' + num
+
     let avaText = this.props.name.match(/\b\w/g) || []
     avaText = ((avaText.shift() || '') + (avaText.pop() || '')).toUpperCase()
 
-    const lastSeen = new Date(this.props.lastSeen).toISOString().replace('T',' ').replace('Z','')
+    let lastSeen = new Date(this.props.lastSeen)
+    if (td.getDate() === lastSeen.getDate() && td.getMonth() === lastSeen.getMonth() && td.getFullYear() === lastSeen.getFullYear()) {
+      lastSeen = nums(lastSeen.getHours()) + ':' + nums(lastSeen.getMinutes())
+    } else {
+      lastSeen = I18n.t('monthsShort')[lastSeen.getHours()] + ' ' + nums(lastSeen.getDate())
+    }
 
     return (
       <TouchableOpacity

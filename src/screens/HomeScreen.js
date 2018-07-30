@@ -14,7 +14,7 @@ export default class HomeScreen extends Component {
   render() {
     return (
       <View style={styles.container}>
-        <ChatsList items={ProfileSvc.all()} />
+        <ChatsList items={ProfileSvc.all({sortBy: 'lastSeen'})} />
         <TouchableOpacity
           style={styles.addChat}
           activeOpacity={0.8}

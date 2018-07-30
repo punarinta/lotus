@@ -44,7 +44,7 @@ export default class SplashScreen extends Component {
     } else {
     }
 
-    await store.init({persist:['phonebook', 'emails', 'accounts']})
+    await store.init({persist:['phonebook', 'accounts']})
 
     // set default values
     window.$ = Object.assign({

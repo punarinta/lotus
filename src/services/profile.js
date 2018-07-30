@@ -20,13 +20,21 @@ class ProfileSvc {
    *
    * @returns {*}
    */
-  static all() {
+  static all(options = {}) {
 
     const all = []
     for (const id in $.phonebook) {
       all.push({
         ...$.phonebook[id],
         id,
+      })
+    }
+
+    if (options.sortBy) {
+      all.sort((a, b) => {
+        if (options.sortBy === 'lastSeen') {
+          return b.lastSeen - a.lastSeen
+        }
       })
     }
 
