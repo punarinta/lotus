@@ -94,7 +94,7 @@ export default class RoomScreen extends Component {
     pc.dataChannels = []
 
     pc.onicecandidate = (event) => {
-      console.log('SIGNAL icecandidate')
+      // console.log('SIGNAL icecandidate')
 
       if (event.candidate) {
 
@@ -137,7 +137,7 @@ export default class RoomScreen extends Component {
         if (pc.watchdog) {
           clearTimeout(pc.watchdog)
         }
-        pc.watchdog = setTimeout(pc.watchdogFunction, 5000, true)
+        pc.watchdog = setTimeout(pc.watchdogFunction, 7500, true)
       }
     }
 
