@@ -94,6 +94,9 @@ export default class RoomScreen extends Component {
   createPC = (peerId, isOffer, userId = null) => {
     const pc = new RTCPeerConnection(webRTCConfig)
 
+    if (userId) {
+      ProfileSvc.update(userId, {peerId})
+    }
     console.log('RRR', peerId, isOffer, userId)
 
     let candidates = []
@@ -101,10 +104,6 @@ export default class RoomScreen extends Component {
     this.setPeerState(peerId, 'connecting')
     pc.iWillRetry = isOffer
     pc.dataChannels = []
-
-    if (userId) {
-      ProfileSvc.update(userId, {peerId})
-    }
 
     pc.onicecandidate = (event) => {
       // console.log('SIGNAL icecandidate')
@@ -128,7 +127,7 @@ export default class RoomScreen extends Component {
     pc.onnegotiationneeded = () => {
       console.log('SIGNAL negotiationneeded')
       if (isOffer) {
-        this.createOffer(peerId, userId).then(() => console.log('Offer created'))
+        this.createOffer(peerId).then(() => console.log('Offer created'))
       }
     }
 
@@ -257,11 +256,11 @@ export default class RoomScreen extends Component {
     }
   }
 
-  createOffer = async (peerId, userId) => {
+  createOffer = async (peerId) => {
     const pc = this.peers[peerId]
     const offer = await pc.createOffer()
     pc.setLocalDescription(offer)
-    this.pubsub.emit(peerId, 'exchange', {sdp: offer, userId})
+    this.pubsub.emit(peerId, 'exchange', {sdp: offer, userId: $.accounts[0].email})
   }
 
   exchange = async (data) => {
