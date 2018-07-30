@@ -99,7 +99,7 @@ class ProfileSvc {
    * @returns {*}
    */
   static update(id, info) {
-    if ($.phonebook[id] && Object.is($.phonebook[id])) {
+    if (typeof $.phonebook[id] === 'object') {
       $.phonebook[id] = Object.assign($.phonebook[id], info)
       ProfileSvc.set(id, $.phonebook[id])
     } else {
