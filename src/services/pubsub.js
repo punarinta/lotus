@@ -62,7 +62,7 @@ class PubSub {
         if (!this.ok) {
           resolve(false)
         } else {
-          if ([1009].contains(e.code)) {
+          if ([1009].includes(e.code)) {
             if (this.extra.onSuggestedReopening) {
               this.extra.onSuggestedReopening(e.code)
             }
