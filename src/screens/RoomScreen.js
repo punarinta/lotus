@@ -105,6 +105,7 @@ export default class RoomScreen extends Component {
           candidates = []
         }, 750)
 
+        // TODO: control TCP skipping in options
         if (event.candidate.candidate.includes(' udp ')) {
           candidates.push(event.candidate)
         }
@@ -128,6 +129,8 @@ export default class RoomScreen extends Component {
         if (this.peers[peerId].watchdog) {
           clearTimeout(this.peers[peerId].watchdog)
         }
+        // send 'whoAreYou'
+        this.dataSend(1, peerId, JSON.stringify({cmd: 'whoAreYou'}))
       }
       if (pc.iceConnectionState === 'checking') {
         // restart watchdog
@@ -208,11 +211,15 @@ export default class RoomScreen extends Component {
       const json = JSON.parse(data)
       switch (json.cmd) {
         case 'whoAreYou':
-          this.dataSend(1, peerId, JSON.stringify({cmd: 'iAm', info: {name: 'Session ' + $.sessionId}}))
+          // send a short profile only -- {id, name}
+          this.dataSend(1, peerId, JSON.stringify({cmd: 'iAm', info: $.accounts[0]}))
           break
 
         case 'iAm':
-          ProfileSvc.update(json.info.id, json.info)
+          // this is a short profile -- {id, name}
+          const ts = (new Date).getTime()
+          json.lastSeen = json.lastSync = ts
+          ProfileSvc.update(json.info.email, json.info)
           break
 
         default:
@@ -288,7 +295,7 @@ export default class RoomScreen extends Component {
           >
             <HomeSvg/>
           </TouchableOpacity>
-          <Text style={{color: Theme.black}}>
+          <Text style={styles.statusText}>
             Connection state: {this.state.connState}
           </Text>
         </View>
@@ -313,10 +320,8 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   statusText: {
-    fontSize: Theme.uiFontSize,
-    textAlign: 'center',
-    margin: 10,
-    color: Theme.white,
+    color: Theme.black,
+    fontFamily: Theme.thinFont,
   },
   navBar: {
     height: 48,

@@ -3,6 +3,7 @@ import { View, StyleSheet, TextInput, FlatList, TouchableOpacity, KeyboardAvoidi
 import Theme from 'config/theme'
 import MessageRow from './MessageRow'
 import SendSvg from './svg/Send'
+import { ProfileSvc } from 'services/profile'
 
 // Messenger should take care of asyncstorage data I/O
 export default class Messenger extends Component {
@@ -29,8 +30,12 @@ export default class Messenger extends Component {
   takeData(chId, peerId, data) {
     if (chId === 0) {
       console.log('Push message', data)
-      // text message incoming
-      this.addMessage(data, peerId)
+      // text message incoming => get userId from peerId
+      let user = ProfileSvc.findByPeerId(peerId)
+      if (!user) {
+        user = ProfileSvc.johnDoe()
+      }
+      this.addMessage(data, user.id)
     }
   }
 

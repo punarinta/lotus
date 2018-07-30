@@ -6,12 +6,31 @@ class ProfileSvc {
   static schema = {
     ver: PropTypes.number.isRequired,
     id: PropTypes.string.isRequired,
-    lastSync: PropTypes.instanceOf(Date).isRequired,
+    lastSync: PropTypes.number.isRequired,
+    lastSeen: PropTypes.number.isRequired,
+    peerId: PropTypes.string.isRequired,
 
     emails: PropTypes.arrayOf(PropTypes.string),
     name: PropTypes.string,
     ava: PropTypes.instanceOf(Uint8Array),
-    lastSeen: PropTypes.instanceOf(Date),
+  }
+
+  /**
+   * Returns all entries
+   *
+   * @returns {*}
+   */
+  static all() {
+
+    const all = []
+    for (const id in $.phonebook) {
+      all.push({
+        ...$.phonebook[id],
+        id,
+      })
+    }
+
+    return all
   }
 
   /**
@@ -21,7 +40,44 @@ class ProfileSvc {
    * @returns {*|null}
    */
   static get(id) {
-    return $.phonebook[id] || null
+    if ($.phonebook[id]) {
+      return {
+        ...$.phonebook[id],
+        id,
+      }
+    } else {
+      return null
+    }
+  }
+
+  /**
+   * Finds a profile by his last known peer ID
+   *
+   * @param peerId
+   * @returns {*}
+   */
+  static findByPeerId(peerId) {
+    for (const id in $.phonebook) {
+      if ($.phonebook[id].peerId === peerId) {
+        return {
+          ...$.phonebook[id],
+          id,
+        }
+      }
+    }
+    return null
+  }
+
+  /**
+   * Returns a sample user
+   *
+   * @returns {{id: string, name: string}}
+   */
+  static johnDoe() {
+    return {
+      id: 'unknown@lotus.test',
+      name: 'Unknown user',
+    }
   }
 
   /**
@@ -45,11 +101,15 @@ class ProfileSvc {
   static update(id, info) {
     if ($.phonebook[id] && Object.is($.phonebook[id])) {
       $.phonebook[id] = Object.assign($.phonebook[id], info)
+      ProfileSvc.set(id, $.phonebook[id])
+    } else {
+      ProfileSvc.set(id, info)
     }
 
-    ProfileSvc.set(id, $.phonebook[id])
-
-    return $.phonebook[id]
+    return {
+      ...$.phonebook[id],
+      id,
+    }
   }
 }
 

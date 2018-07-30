@@ -1,27 +1,9 @@
 import React, { Component } from 'react'
-import {View, StyleSheet, TouchableOpacity, Platform} from 'react-native'
+import { View, StyleSheet, TouchableOpacity, Platform } from 'react-native'
 import ChatsList from 'components/ChatsList'
 import Theme from 'config/theme'
 import GroupAddSvg from 'components/svg/GroupAdd'
-
-const sampleChats = [
-  {
-    id: Platform.OS === 'ios' ? 'android@lotus.test' : 'ios@lotus.test',
-    name: Platform.OS === 'ios' ? 'Android phone' : 'iOS phone'
-  },
-  {
-    id: 'john.doe@mail.test',
-    name: 'John Doe',
-  },
-  {
-    id: 'ronald.pierce@user.test',
-    name: 'Ronald Pierce',
-  },
-  {
-    id: 'mike.hudson@user.test',
-    name: 'Mike Hudson',
-  },
-]
+import { ProfileSvc } from 'services/profile'
 
 export default class HomeScreen extends Component {
 
@@ -32,7 +14,7 @@ export default class HomeScreen extends Component {
   render() {
     return (
       <View style={styles.container}>
-        <ChatsList items={sampleChats} />
+        <ChatsList items={ProfileSvc.all()} />
         <TouchableOpacity
           style={styles.addChat}
           activeOpacity={0.8}

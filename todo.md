@@ -1,5 +1,4 @@
 To fix:
-* iOS keyboard covering messenger
 * 
 
 Prio features:
@@ -7,6 +6,8 @@ Prio features:
 * contact book (UI)
 * fetch messages posted when you were absent
 * 'last seen'
+* profile info exchange
+* add a chat
 * main UIs
 * 
 
@@ -18,4 +19,6 @@ Other features:
 * account switching
 * server federation (Redis and Redisless)
 * translations
-* 
+* settings page (TCP skipping)
+* update lastSeen on disconnect
+

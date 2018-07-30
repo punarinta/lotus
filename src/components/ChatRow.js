@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { View, Text, StyleSheet, TouchableOpacity, Platform } from 'react-native'
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native'
 import Theme from 'config/theme'
 
 export default class ChatRow extends Component {
@@ -7,12 +7,15 @@ export default class ChatRow extends Component {
   static defaultProps = {
     id: null,
     name: null,
+    lastSeen: null,
   }
 
   render() {
 
     let avaText = this.props.name.match(/\b\w/g) || []
     avaText = ((avaText.shift() || '') + (avaText.pop() || '')).toUpperCase()
+
+    const lastSeen = new Date(this.props.lastSeen).toISOString().replace('T',' ').replace('Z','')
 
     return (
       <TouchableOpacity
@@ -26,7 +29,7 @@ export default class ChatRow extends Component {
         </View>
         <View style={styles.notAva}>
           <Text style={styles.nameText}>{ this.props.name }</Text>
-
+          <Text style={styles.lastSeen}>Last seen: { lastSeen }</Text>
         </View>
       </TouchableOpacity>
     )
@@ -65,10 +68,17 @@ const styles = StyleSheet.create({
     color: Theme.black,
     fontSize: 18,
     paddingBottom: 2,
+    // fontFamily: Theme.condensedFont,
   },
   nameText: {
     fontSize: 15,
     color: Theme.black,
-    fontFamily: Platform.select({android: 'sans-serif-light'}),
+    fontFamily: Theme.thinFont,
+    paddingBottom: 1,
+  },
+  lastSeen: {
+    fontSize: 10,
+    color: Theme.gray,
+    fontFamily: Theme.thinFont,
   },
 })

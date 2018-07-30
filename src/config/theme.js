@@ -17,15 +17,14 @@ const theme = {
   inactiveGray: '#e0e0e0',
   required: 'red',
 
-  /*white: '#e9e9e9',
-  lightGray: '#8a8989',
-  gray: '#5c5a5a',
-  black: '#393637',*/
   black: '#000',
   white: '#fff',
   lightGray: '#e9e9e9',
   gray: '#8a8989',
   darkGray: '#5c5a5a',
+
+  thinFont: Platform.select({android: 'sans-serif-light'}),
+  condensedFont: Platform.select({android: 'sans-serif-condensed'}),
 
   debug: {
     borderWidth: 1,
