@@ -4,11 +4,12 @@ class PubSub {
   ok = false
   listeners = {}
 
-  constructor(secure, server, path, channelId) {
+  constructor(secure, server, path, channelId, extra = {}) {
     this.server = server
     this.path = path
     this.channelId = channelId
     this.secure = secure
+    this.extra = extra
   }
 
   async init() {
@@ -60,6 +61,12 @@ class PubSub {
         console.log('Socket closed', e.code, e.reason)
         if (!this.ok) {
           resolve(false)
+        } else {
+          if ([1009].contains(e.code)) {
+            if (this.extra.onSuggestedReopening) {
+              this.extra.onSuggestedReopening(e.code)
+            }
+          }
         }
         this.ok = false
       }

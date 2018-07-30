@@ -42,7 +42,7 @@ export default class RoomScreen extends Component {
       hash2 = sha256(this.navParams.peer).substring(0, 32),
       bool = $.accounts[0].email > this.navParams.peer
 
-    this.pubsub = new PubSub(false, '46.101.117.47', '/lotus', bool ? hash1 + hash2 : hash2 + hash1)
+    this.pubsub = new PubSub(false, '46.101.117.47', '/lotus', bool ? hash1 + hash2 : hash2 + hash1, {onSuggestedReopening: () => this.initPubSub()})
 
     if (!await this.pubsub.init()) {
       console.log('PubSub server connection failure')
