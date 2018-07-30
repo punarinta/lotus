@@ -50,8 +50,7 @@ export default class RoomScreen extends Component {
     }
 
     this.pubsub.on('join', ([peerId, userId]) => {
-      ProfileSvc.update(userId, {peerId})
-      this.createPC(peerId, true)
+      this.createPC(peerId, true, userId)
     })
 
     this.pubsub.on('exchange', this.exchange)
@@ -92,14 +91,20 @@ export default class RoomScreen extends Component {
     this.setState({connStates})
   }
 
-  createPC = (peerId, isOffer) => {
+  createPC = (peerId, isOffer, userId = null) => {
     const pc = new RTCPeerConnection(webRTCConfig)
+
+    console.log('RRR', peerId, isOffer, userId)
 
     let candidates = []
     let candyWatch = null
     this.setPeerState(peerId, 'connecting')
     pc.iWillRetry = isOffer
     pc.dataChannels = []
+
+    if (userId) {
+      ProfileSvc.update(userId, {peerId})
+    }
 
     pc.onicecandidate = (event) => {
       // console.log('SIGNAL icecandidate')
@@ -123,7 +128,7 @@ export default class RoomScreen extends Component {
     pc.onnegotiationneeded = () => {
       console.log('SIGNAL negotiationneeded')
       if (isOffer) {
-        this.createOffer(peerId).then(() => console.log('Offer created'))
+        this.createOffer(peerId, userId).then(() => console.log('Offer created'))
       }
     }
 
@@ -252,17 +257,17 @@ export default class RoomScreen extends Component {
     }
   }
 
-  createOffer = async (peerId) => {
+  createOffer = async (peerId, userId) => {
     const pc = this.peers[peerId]
     const offer = await pc.createOffer()
     pc.setLocalDescription(offer)
-    this.pubsub.emit(peerId, 'exchange', {sdp: offer})
+    this.pubsub.emit(peerId, 'exchange', {sdp: offer, userId})
   }
 
   exchange = async (data) => {
     // console.log('EVENT exchange', data)
     const peerId = data.rtcFrom
-    const pc = this.peers[peerId] ? this.peers[peerId] : this.createPC(peerId, false)
+    const pc = this.peers[peerId] ? this.peers[peerId] : this.createPC(peerId, false, data.userId)
 
     if (data.sdp) {
       await pc.setRemoteDescription(new RTCSessionDescription(data.sdp))
