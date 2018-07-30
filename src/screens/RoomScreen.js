@@ -11,7 +11,7 @@ import I18n from 'i18n'
 import { sha256 } from 'js-sha256'
 import HomeSvg from 'components/svg/Home'
 
-const webRTCConfig = {'iceServers': [{'urls': 'stun:stun.services.mozilla.com'}, {'urls': 'stun:stun.l.google.com:19302'}]}
+const webRTCConfig = {iceCandidatePoolSize: 16, 'iceServers': [{'urls': 'stun:stun.services.mozilla.com'}, {'urls': 'stun:stun.l.google.com:19302'}]}
 
 export default class RoomScreen extends Component {
 
