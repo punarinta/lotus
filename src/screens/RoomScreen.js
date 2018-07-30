@@ -137,7 +137,7 @@ export default class RoomScreen extends Component {
         if (pc.watchdog) {
           clearTimeout(pc.watchdog)
         }
-        pc.watchdog = setTimeout(pc.watchdogFunction, 5000)
+        pc.watchdog = setTimeout(pc.watchdogFunction, 5000, true)
       }
     }
 
@@ -167,9 +167,9 @@ export default class RoomScreen extends Component {
       console.log('ondatachannel fired for', peerId, event.channel)
     }
 
-    pc.watchdogFunction = () => {
+    pc.watchdogFunction = (dontCompare = false) => {
       console.log('Watchdog fired for state ' + this.state.connState)
-      if (['failed', 'closed', 'disconnected', '?'].includes(this.state.connState) && pc.iWillRetry) {
+      if ((['failed', 'closed', 'disconnected', '?'].includes(this.state.connState) || dontCompare) && pc.iWillRetry) {
         pc.close()
         delete this.peers[peerId]
         console.log('Retrying for peer ' + peerId)

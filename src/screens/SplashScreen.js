@@ -64,7 +64,7 @@ export default class SplashScreen extends Component {
     ]
 
     $.phonebook = {
-      'john.doe@mail.test': {name: 'John Doe'},
+      'phillip.horton@mail.test': {name: 'Phillip Horton'},
       'ronald.pierce@user.test': {name: 'Ronald Pierce'},
       'mike.hudson@user.test': {name: 'Mike Hudson'},
     }
