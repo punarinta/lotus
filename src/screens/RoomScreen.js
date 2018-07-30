@@ -179,10 +179,10 @@ export default class RoomScreen extends Component {
       }
     }
 
-    ['text', 'aux'].forEach((chName, i) => {
-      const ch = pc.createDataChannel(chName, {negotiated: true, id: i})
-      ch.onmessage = (event) => this.onDataRead(i, peerId, event.data)
-      pc.dataChannels[i] = ch
+    ['text', 'aux'].forEach((chName, id) => {
+      const ch = pc.createDataChannel(chName, {negotiated: true, id})
+      ch.onmessage = (event) => this.onDataRead(id, peerId, event.data)
+      pc.dataChannels[id] = ch
     })
 
     this.peers[peerId] = pc
