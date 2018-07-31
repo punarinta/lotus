@@ -1,4 +1,5 @@
 To fix:
+* connection loss on phone off
 * 
 
 Prio features:

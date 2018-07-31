@@ -144,7 +144,8 @@ export default class RoomScreen extends Component {
         if (this.peers[peerId].watchdog) {
           clearTimeout(this.peers[peerId].watchdog)
         }
-        this.dataSend(1, peerId, JSON.stringify({cmd: 'whoAreYou'}))
+        const peerUser = ProfileSvc.findByPeerId(peerId)
+        this.dataSend(1, peerId, JSON.stringify({cmd: 'syncReq', lastSeen: peerUser ? peerUser.lastSeen : null}))
       }
       if (pc.iceConnectionState === 'checking') {
         if (pc.iWillRetry) {
@@ -232,16 +233,15 @@ export default class RoomScreen extends Component {
     if (chId === 1) {
       const json = JSON.parse(data)
       switch (json.cmd) {
-        case 'whoAreYou':
+        case 'syncReq':
           // send a short profile only -- {id, name}
-          this.dataSend(1, peerId, JSON.stringify({cmd: 'iAm', info: $.accounts[0]}))
+          // TODO: if json.lastSeen < $.accounts[0].lastUpd => send full profile
+          this.dataSend(1, peerId, JSON.stringify({cmd: 'syncResp', info: $.accounts[0]}))
           break
 
-        case 'iAm':
+        case 'syncResp':
           // this is a short profile -- {id, name}
-          const ts = (new Date).getTime()
-          json.info.lastSeen = json.info.lastSync = ts
-          json.info.peerId = peerId
+          json.info.lastSeen = (new Date).getTime()
           ProfileSvc.update(json.info.email, json.info)
           break
 
@@ -292,7 +292,7 @@ export default class RoomScreen extends Component {
       this.peers[i].close()
     }
 
-    this.props.navigation.dispatch(StackActions.reset({index: 0, actions: [NavigationActions.navigate({routeName: 'Home'})]}))
+    // this.props.navigation.dispatch(StackActions.reset({index: 0, actions: [NavigationActions.navigate({routeName: 'Home'})]}))
   }
 
   render() {

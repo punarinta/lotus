@@ -25,6 +25,7 @@ const theme = {
 
   thinFont: Platform.select({android: 'sans-serif-light'}),
   condensedFont: Platform.select({android: 'sans-serif-condensed'}),
+  monoFont: Platform.select({android: 'monospace', ios: 'Courier New'}),
 
   debug: {
     borderWidth: 1,

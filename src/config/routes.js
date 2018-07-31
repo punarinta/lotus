@@ -1,4 +1,6 @@
 import SplashScreen from 'screens/SplashScreen'
+import StartScreen from 'screens/StartScreen'
+import PinScreen from 'screens/PinScreen'
 import HomeScreen from 'screens/HomeScreen'
 import RoomScreen from 'screens/RoomScreen'
 
@@ -22,6 +24,8 @@ const navigationOptions = {header: null}
 
 export default {
   Splash: { screen: SplashScreen, navigationOptions },
+  Start: { screen: StartScreen, navigationOptions },
+  Pin: { screen: PinScreen, navigationOptions },
   Home: { screen: HomeScreen, navigationOptions },
   Room: { screen: RoomScreen, navigationOptions },
 }

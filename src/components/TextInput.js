@@ -1,10 +1,22 @@
 import React, { Component } from 'react'
-import { View, StyleSheet, TextInput as RNTextInput, Platform } from 'react-native'
+import { View, StyleSheet, TextInput as RNTextInput, Platform, Text } from 'react-native'
 import Theme from 'config/theme'
 import { SysSvc } from 'services/sys'
 import I18n from 'i18n'
 
 export default class TextInput extends Component {
+
+  static defaultProps = {
+    title: null,
+    style: {},
+    containerStyle: {},
+    onBlur: () => null,
+  }
+
+  isEmail = (email) => {
+    const re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+    return re.test(email)
+  }
 
   componentWillMount() {
     this.setState({
@@ -43,7 +55,7 @@ export default class TextInput extends Component {
         ok = false
       }
 
-      if (type === 'email' && !SysSvc.isEmail(text.trim())) {
+      if (type === 'email' && !this.isEmail(text.trim())) {
         ok = false
       }
 
@@ -68,7 +80,7 @@ export default class TextInput extends Component {
 
     let extraProps = {}
 
-    const { type, containerStyle, onBlur, ...otherProps } = this.props
+    const { type, onBlur, style, title, containerStyle, ...otherProps } = this.props
 
     if (type === 'email') {
       extraProps.autoCapitalize = 'none'
@@ -78,12 +90,14 @@ export default class TextInput extends Component {
       extraProps.keyboardType = type ? type : 'default'
     }
 
-    const zhOpa = $.me && $.me.language === 'zh' && Platform.OS === 'ios'
+    const zhOpa = false // $.me && $.me.language === 'zh' && Platform.OS === 'ios'
 
     return (
-      <View style={[styles.container, !this.state.ok && styles.required, containerStyle]}>
+      <View style={[styles.container, containerStyle]}>
+        {
+          this.props.title !== null && <Text style={styles.title}>{ title.toUpperCase() }</Text>
+        }
         <RNTextInput
-          placeholder={ I18n.t('textInput.placeholder') }
           ref="input"
           autoCorrect={false}
           autoCapitalize="none"
@@ -96,13 +110,12 @@ export default class TextInput extends Component {
           }}
           onBlur={() => {
             zhOpa ? this.handleOnChange(this.state.tempText) : null
-            if (onBlur) onBlur()
+            onBlur()
           }}
-          selectionColor={Theme.activeGray}
+          selectionColor={Theme.gray}
           underlineColorAndroid="transparent"
-          textSize={48}
           value={this.state.text}
-          style={{fontSize: Theme.uiFontSize, fontStyle: (this.state.text && this.state.text.length) ? 'normal' : 'italic'}}
+          style={[styles.input, style, !this.state.ok && styles.required]}
           {...extraProps}
           {...otherProps}
         />
@@ -113,15 +126,27 @@ export default class TextInput extends Component {
 
 const styles = StyleSheet.create({
   container: {
-    borderColor: Theme.activeGreen,
-    borderWidth: 2,
     backgroundColor: '#fff',
-    height: Theme.uiHeight,
-    borderRadius: 32,
-    paddingHorizontal: 16,
     justifyContent: 'center',
   },
   required: {
     borderColor: Theme.required,
+  },
+  input: {
+    borderColor: Theme.black,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderRadius: 3,
+    height: 36,
+    fontSize: 16,
+    paddingTop: 0,
+    paddingBottom: 2,
+    fontStyle: 'normal',
+    fontFamily: Theme.monoFont,
+  },
+  title: {
+    color: Theme.darkGray,
+    fontSize: 10,
+    textTransform: 'uppercase',
+    fontFamily: Theme.thinFont,
   },
 })

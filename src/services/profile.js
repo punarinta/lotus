@@ -6,11 +6,11 @@ class ProfileSvc {
   static schema = {
     ver: PropTypes.number.isRequired,
     id: PropTypes.string.isRequired,
-    lastSync: PropTypes.number.isRequired,
-    lastSeen: PropTypes.number.isRequired,
     peerId: PropTypes.string.isRequired,
+    lastSeen: PropTypes.number.isRequired,
 
-    emails: PropTypes.arrayOf(PropTypes.string),
+    lastUpd: PropTypes.number,                  // last time when profile was updated
+    email: PropTypes.string,
     name: PropTypes.string,
     ava: PropTypes.instanceOf(Uint8Array),
   }
