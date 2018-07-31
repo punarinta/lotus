@@ -4,9 +4,8 @@ class PubSub {
   ok = false
   listeners = {}
 
-  constructor(secure, server, path, channelId, extra = {}) {
-    this.server = server
-    this.path = path
+  constructor(secure, serverPath, channelId, extra = {}) {
+    this.serverPath = serverPath
     this.channelId = channelId
     this.secure = secure
     this.extra = extra
@@ -15,7 +14,7 @@ class PubSub {
   async init() {
 
     return new Promise((resolve) => {
-      const ws = new WebSocket((this.secure ? 'wss://' : 'ws://') + this.server + this.path + '/sub/' + this.channelId)
+      const ws = new WebSocket((this.secure ? 'wss://' : 'ws://') + this.serverPath + 'lotus/sub/' + this.channelId)
 
       ws.onopen = () => {
         this.ok = true
@@ -54,7 +53,7 @@ class PubSub {
       }
 
       ws.onerror = (e) => {
-        console.log('WS error', e.message)
+        console.log('Socket error', e.message)
       }
 
       ws.onclose = (e) => {
@@ -92,7 +91,7 @@ class PubSub {
     }
 
     if (wait) {
-      const request = await fetch((this.secure ? 'https' : 'http') + '://' + this.server + this.path + '/pub/' + this.channelId, cfg)
+      const request = await fetch((this.secure ? 'https' : 'http') + '://' + this.serverPath + 'lotus/pub/' + this.channelId, cfg)
 
       if (!request.ok) {
         console.log('ERROR (req.ok != true)', request.status, await request.text(), data )
@@ -101,7 +100,7 @@ class PubSub {
       // TODO: add when supported by RN
       // const controller = new AbortController()
       // cfg.signal = controller.signal
-      fetch((this.secure ? 'https' : 'http') + '://' + this.server + this.path + '/pub/' + this.channelId, cfg)
+      fetch((this.secure ? 'https' : 'http') + '://' + this.serverPath + 'lotus/pub/' + this.channelId, cfg)
       // controller.abort()
     }
   }

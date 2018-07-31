@@ -22,7 +22,6 @@ export default class RoomScreen extends Component {
 
     this.state = {
       isAVOn: false,
-    //  connState: 'offline',
       remoteStreams: {},
       connStates: {},
     }
@@ -42,7 +41,10 @@ export default class RoomScreen extends Component {
       hash2 = sha256(this.navParams.peer).substring(0, 32),
       bool = $.accounts[0].email > this.navParams.peer
 
-    this.pubsub = new PubSub(false, '46.101.117.47', '/lotus', bool ? hash1 + hash2 : hash2 + hash1, {onSuggestedReopening: () => this.initPubSub()})
+    this.pubsub = new PubSub(false, '46.101.117.47/', bool ? hash1 + hash2 : hash2 + hash1, { onSuggestedReopening: (code) => {
+      console.log('WARNING: onSuggestedReopening was triggered with error code ' + code)
+      this.initPubSub()
+    }})
 
     if (!await this.pubsub.init()) {
       console.log('PubSub server connection failure')
@@ -125,9 +127,7 @@ export default class RoomScreen extends Component {
 
     pc.onnegotiationneeded = () => {
       console.log('SIGNAL negotiationneeded')
-      if (isOffer) {
-        this.createOffer(peerId).then(() => console.log('Offer created'))
-      }
+      if (isOffer) this.createOffer(peerId)
     }
 
     pc.oniceconnectionstatechange = () => {
@@ -151,7 +151,7 @@ export default class RoomScreen extends Component {
           if (pc.watchdog) {
             clearTimeout(pc.watchdog)
           }
-          pc.watchdog = setTimeout(pc.watchdogFunction, 7500, true)
+          pc.watchdog = setTimeout(pc.watchdogFunction, 10000, true)
         }
       }
 
@@ -188,10 +188,6 @@ export default class RoomScreen extends Component {
       }
     }
 
-    pc.ondatachannel = (event) => {
-      console.log('ondatachannel fired for', peerId, event.channel)
-    }
-
     pc.watchdogFunction = (dontCompare = false) => {
       console.log('Watchdog fired for state ' + this.state.connStates[peerId])
       if ((['failed', 'closed', 'connecting'].includes(this.state.connStates[peerId]) || dontCompare)) {
@@ -211,7 +207,7 @@ export default class RoomScreen extends Component {
 
     this.peers[peerId] = pc
 
-    console.log('PC created with ' + peerId)
+    console.log(`Peer ${peerId} created`)
 
     return pc
   }
@@ -232,7 +228,7 @@ export default class RoomScreen extends Component {
 
     // hardcode data channel subscribers
     if (this.refs.msg) this.refs.msg.takeData(chId, peerId, data)
-    // if (this.refs.skt) this.refs.skt.takeData(chId, peerId, data)
+
     if (chId === 1) {
       const json = JSON.parse(data)
       switch (json.cmd) {
@@ -289,24 +285,14 @@ export default class RoomScreen extends Component {
   }
 
   leaveChat = () => {
-    if (this.state.isAVOn && this.refs.av) {
-      this.refs.av.close()
-    }
-    if (this.pubsub) {
-      this.pubsub.close()
-    }
+    if (this.pubsub) this.pubsub.close()
+    if (this.state.isAVOn && this.refs.av) this.refs.av.close()
     for (const i in this.peers) {
-      if (this.peers[i].watchdog) {
-        clearTimeout(this.peers[i].watchdog)
-      }
+      if (this.peers[i].watchdog) clearTimeout(this.peers[i].watchdog)
       this.peers[i].close()
     }
 
-    this.props.navigation.dispatch(StackActions.reset
-    ({
-      index: 0,
-      actions: [NavigationActions.navigate({routeName: 'Home'})]
-    }))
+    this.props.navigation.dispatch(StackActions.reset({index: 0, actions: [NavigationActions.navigate({routeName: 'Home'})]}))
   }
 
   render() {
