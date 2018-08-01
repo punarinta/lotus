@@ -1,17 +1,17 @@
 import React from 'react'
-import { TouchableOpacity, Text, StyleSheet, View } from 'react-native'
+import { TouchableHighlight, Text, StyleSheet, View } from 'react-native'
 import Theme from 'config/theme'
 
-const Button = (props) => {
+export default props => {
 
   const active = props.hasOwnProperty('active') ? props.active : true
   const aux = props.hasOwnProperty('aux') ? props.aux : false
-  const size = props.size || 'regular'
   let timer = null
 
   if (active) {
     return (
-      <TouchableOpacity
+      <TouchableHighlight
+        underlayColor={Theme.lightGray}
         onPress={() => {
           if (props.hasOwnProperty('onPress') && (props.allowMultipleTaps || !timer)) {
             timer = setTimeout(() => timer = null, 1000)
@@ -22,57 +22,58 @@ const Button = (props) => {
         style={[styles.container, aux ? styles.containerAux : null, props.style]}
       >
         <Text style={[styles.caption, aux ? styles.captionAux : null]}>
-          {props.caption}
+          { props.caption }
         </Text>
-      </TouchableOpacity>
+      </TouchableHighlight>
     )
   } else {
     return (
       <View style={[styles.container, aux ? styles.containerInactiveAux : styles.containerInactive, props.style]}>
-        <Text style={[styles.caption, aux ? styles.captionInactiveAux : null]}>
-          {props.caption}
+        <Text style={[styles.caption, aux ? styles.captionInactiveAux : styles.captionInactive]}>
+          { props.caption }
         </Text>
       </View>
     )
   }
 }
 
-export default Button
-
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: Theme.activeGreen,
-    height: Theme.uiHeight,
-    minHeight: Theme.uiHeight,
-    borderRadius: 8,
+    backgroundColor: Theme.white,
+    height: 36,
+    borderRadius: 3,
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 32,
     paddingBottom: 2,
-  },
-  containerAux: {
-    backgroundColor: '#fff',
+    borderColor: Theme.black,
     borderWidth: 2,
-    borderColor: Theme.activeBlack,
   },
   containerInactive: {
-    backgroundColor: Theme.inactiveGreen,
+    backgroundColor: Theme.lightGray,
+    borderColor: Theme.lightGray,
+  },
+  containerAux: {
+    borderWidth: StyleSheet.hairlineWidth,
+    backgroundColor: Theme.white,
+    borderColor: Theme.black,
   },
   containerInactiveAux: {
-    backgroundColor: '#fff',
-    borderWidth: 2,
-    borderColor: Theme.inactiveBlack,
+    borderWidth: StyleSheet.hairlineWidth,
+    backgroundColor: Theme.lightGray,
+    borderColor: Theme.lightGray,
   },
   caption: {
-    color: '#fff',
-    fontSize: Theme.uiFontSize16,
-    fontWeight: 'bold',
+    color: Theme.black,
     textAlign: 'center',
   },
-  captionInactiveAux: {
-    color: Theme.inactiveBlack,
+  captionInactive: {
+    color: Theme.gray,
   },
   captionAux: {
-    color: Theme.activeBlack,
+    color: Theme.black,
+  },
+  captionInactiveAux: {
+    color: Theme.gray,
   },
 })
