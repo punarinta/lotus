@@ -126,7 +126,11 @@ export default class SplashScreen extends Component {
 
   async componentDidUpdate(prevProps, prevState) {
     if (this.state.hydrated && !prevState.hydrated) {
-      this.resetNavigationTo('Start')
+      if ($.accounts.length) {
+        this.resetNavigationTo('Home')
+      } else {
+        this.resetNavigationTo('Start')
+      }
     } else {
       console.log("this.resetNavigationTo('Home') failed")
     }

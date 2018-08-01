@@ -1,15 +1,23 @@
 import React, { Component } from 'react'
 import { View, StyleSheet, Dimensions, Text, Animated, Keyboard } from 'react-native'
+import { NavigationActions, StackActions } from 'react-navigation'
 import Button from 'components/Button'
 import TextInput from 'components/TextInput'
 import Theme from 'config/theme'
 import LogoSvg from 'components/svg/Logo'
+import store from 'core/store'
 
 export default class StartScreen extends Component {
 
   watchdog = null
   sizeValue = new Animated.Value(1)
   sizeValue2 = new Animated.Value(width * 0.5)
+
+  state = {
+    ok: false,
+    name: '',
+    email: '',
+  }
 
   fieldFocused = () => {
     Animated.timing(this.sizeValue, { toValue: 0, duration: 350 }).start()
@@ -25,6 +33,13 @@ export default class StartScreen extends Component {
       Animated.timing(this.sizeValue2, { toValue: width * 0.5, duration: 350 }).start()
       this.watchdog = null
     }, 100)
+  }
+
+  start = () => {
+    const { email, name } = this.state
+    $.accounts = [{ email, name }]
+    store.sync()
+    this.props.navigation.dispatch(StackActions.reset({index: 0, actions: [NavigationActions.navigate({routeName: 'Home'})]}))
   }
 
   render() {
@@ -46,12 +61,21 @@ export default class StartScreen extends Component {
             onBlur={this.fieldBlurred}
             onSubmitEditing={() => this.refs.name.focus()}
             blurOnSubmit={false}
+            onChange={(email, ok) => this.setState({email, ok})}
           />
           <TextInput
             ref="name"
             title="name"
             onFocus={this.fieldFocused}
             onBlur={this.fieldBlurred}
+            containerStyle={{width: width * 0.7}}
+            onChange={(name, ok) => this.setState({name})}
+          />
+          <Button
+            style={{marginTop: 32, width: width * 0.3}}
+            caption="Start"
+            active={this.state.ok}
+            onPress={this.start}
           />
         </View>
         <View style={styles.gap}/>
@@ -70,6 +94,7 @@ const styles = StyleSheet.create({
   controls: {
     paddingHorizontal: width * 0.15,
     paddingTop: width * 0.1,
+    alignItems: 'center'
   },
   logo: {
     alignItems: 'center',
