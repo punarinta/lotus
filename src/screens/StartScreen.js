@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { View, StyleSheet, Dimensions, Text, Animated, Easing } from 'react-native'
+import { View, StyleSheet, Dimensions, Text, Animated, Keyboard } from 'react-native'
 import Button from 'components/Button'
 import TextInput from 'components/TextInput'
 import Theme from 'config/theme'
@@ -7,12 +7,24 @@ import LogoSvg from 'components/svg/Logo'
 
 export default class StartScreen extends Component {
 
+  watchdog = null
   sizeValue = new Animated.Value(1)
   sizeValue2 = new Animated.Value(width * 0.5)
 
-  fieldFocus = () => {
-    Animated.timing(this.sizeValue, { toValue: 0, duration: 600, easing: Easing.linear }).start()
-    Animated.timing(this.sizeValue2, { toValue: 0, duration: 500, easing: Easing.bounce }).start()
+  fieldFocused = () => {
+    Animated.timing(this.sizeValue, { toValue: 0, duration: 350 }).start()
+    Animated.timing(this.sizeValue2, { toValue: 0, duration: 350 }).start()
+    if (this.watchdog) clearTimeout(this.watchdog)
+  }
+
+  fieldBlurred = () => {
+    if (this.watchdog) clearTimeout(this.watchdog)
+    this.watchdog = setTimeout(() => {
+      Keyboard.dismiss()
+      Animated.timing(this.sizeValue, { toValue: 1, duration: 350 }).start()
+      Animated.timing(this.sizeValue2, { toValue: width * 0.5, duration: 350 }).start()
+      this.watchdog = null
+    }, 100)
   }
 
   render() {
@@ -25,14 +37,21 @@ export default class StartScreen extends Component {
             </View>
           </Animated.View>
           <TextInput
-            Qrequired
+            required
             type="email"
             title="email"
-            containerStyle={width * 0.7}
-            onFocus={this.fieldFocus}
+            containerStyle={{width: width * 0.7, marginBottom: 8}}
+            returnKeyType="next"
+            onFocus={this.fieldFocused}
+            onBlur={this.fieldBlurred}
+            onSubmitEditing={() => this.refs.name.focus()}
+            blurOnSubmit={false}
           />
           <TextInput
+            ref="name"
             title="name"
+            onFocus={this.fieldFocused}
+            onBlur={this.fieldBlurred}
           />
         </View>
         <View style={styles.gap}/>

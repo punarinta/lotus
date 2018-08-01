@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 import { View, StyleSheet, TextInput as RNTextInput, Platform, Text } from 'react-native'
 import Theme from 'config/theme'
 import { SysSvc } from 'services/sys'
-import I18n from 'i18n'
+import ErrorSvg from './svg/Error'
 
 export default class TextInput extends Component {
 
@@ -11,6 +11,11 @@ export default class TextInput extends Component {
     style: {},
     containerStyle: {},
     onBlur: () => null,
+  }
+
+  state = {
+    text: '',
+    tempText: '',
   }
 
   isEmail = (email) => {
@@ -90,7 +95,7 @@ export default class TextInput extends Component {
       extraProps.keyboardType = type ? type : 'default'
     }
 
-    const zhOpa = false // $.me && $.me.language === 'zh' && Platform.OS === 'ios'
+    const zhOpa = false // $.global && $.global.lang === 'zh' && Platform.OS === 'ios'
 
     return (
       <View style={[styles.container, containerStyle]}>
@@ -115,10 +120,16 @@ export default class TextInput extends Component {
           selectionColor={Theme.gray}
           underlineColorAndroid="transparent"
           value={this.state.text}
-          style={[styles.input, style, !this.state.ok && styles.required]}
+          style={[styles.input, style]}
           {...extraProps}
           {...otherProps}
         />
+        {
+          (!this.state.ok && !!this.state.text && this.state.text.length) &&
+            <View style={styles.required}>
+              <ErrorSvg color={Theme.gray} size={20} />
+            </View>
+        }
       </View>
     )
   }
@@ -127,10 +138,14 @@ export default class TextInput extends Component {
 const styles = StyleSheet.create({
   container: {
     backgroundColor: '#fff',
-    justifyContent: 'center',
+    flex: 1,
+    minHeight: 50,
   },
   required: {
-    borderColor: Theme.required,
+    position: 'absolute',
+    zIndex: 1,
+    right: 6,
+    top: 22,
   },
   input: {
     borderColor: Theme.black,
