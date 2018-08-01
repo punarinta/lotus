@@ -50,7 +50,7 @@ export default class SplashScreen extends Component {
     window.$ = Object.assign({
       navigator: this.props.navigation,
       resetNavigationTo: this.resetNavigationTo,
-      sessionId: Math.random() + '',
+      sessionId: (Math.random() + '').replace('0.', ''),
       phonebook: {},
       accounts: [],
     }, $)
