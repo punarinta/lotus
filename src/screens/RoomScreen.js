@@ -252,9 +252,8 @@ export default class RoomScreen extends Component {
 
   createOffer = async (peerId) => {
     const pc = this.peers[peerId]
-    const offer = await pc.createOffer()
-    pc.setLocalDescription(offer)
-    this.pubsub.emit(peerId, 'exchange', {sdp: offer, userId: $.accounts[0].id})
+    await pc.setLocalDescription(await pc.createOffer())
+    this.pubsub.emit(peerId, 'exchange', {sdp: pc.localDescription, userId: $.accounts[0].id})
   }
 
   exchange = async (data) => {
@@ -263,11 +262,15 @@ export default class RoomScreen extends Component {
     const pc = this.peers[peerId] ? this.peers[peerId] : this.createPC(peerId, false, data.userId)
 
     if (data.sdp) {
-      await pc.setRemoteDescription(new RTCSessionDescription(data.sdp))
+
       if (data.sdp.type === 'offer') {
-        const answer = await pc.createAnswer()
-        pc.setLocalDescription(answer)
-        this.pubsub.emit(peerId, 'exchange', {sdp: answer})
+        await pc.setRemoteDescription(data.sdp)
+        await pc.setLocalDescription(await pc.createAnswer())
+        this.pubsub.emit(peerId, 'exchange', {sdp: pc.localDescription})
+      } else if (data.sdp.type === 'answer') {
+        await pc.setRemoteDescription(data.sdp)
+      } else {
+        console.log('Unsupported SDP type. Your code may differ here.')
       }
     }
 
