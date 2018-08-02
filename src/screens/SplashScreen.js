@@ -1,14 +1,13 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
-import store from 'core/store'
-import Loader from 'components/Loader'
 import { NavigationActions, StackActions } from 'react-navigation'
 import { StatusBar, Platform } from 'react-native'
-import I18n from 'i18n'
-import { SysSvc } from 'services/sys'
-import { FcmSvc } from 'services/fcm'
 import firebase from 'react-native-firebase'
 import InCallManager from 'react-native-incall-manager'
+import store from 'core/store'
+import Loader from 'components/Loader'
+import { SysSvc } from 'services/sys'
+import { FcmSvc } from 'services/fcm'
 import Theme from 'config/theme'
 
 export default class SplashScreen extends Component {
@@ -18,6 +17,12 @@ export default class SplashScreen extends Component {
 
   state = {
     hydrated: false,
+  }
+
+  constructor(props) {
+    super(props)
+    StatusBar.setBarStyle('dark-content')
+    StatusBar.setBackgroundColor(Theme.white)
   }
 
   resetNavigationTo = (routeName) => {
@@ -30,18 +35,12 @@ export default class SplashScreen extends Component {
 
   async componentWillMount() {
 
-    StatusBar.setBarStyle('dark-content')
-    StatusBar.setBackgroundColor(Theme.white)
-
-    const enabled = await firebase.messaging().hasPermission()
-
-    if (!enabled) {
+    if (!await firebase.messaging().hasPermission()) {
       try {
         await firebase.messaging().requestPermission()
       } catch (error) {
         console.log('ERR', error)
       }
-    } else {
     }
 
     await store.init({persist:['phonebook', 'accounts']})
@@ -75,8 +74,6 @@ export default class SplashScreen extends Component {
       $.phonebook['ios@lotus.test'] = {name: 'iOS phone'}
     }
     // TODO: end remove
-
-    I18n.init('en_US')
 
     const channel = new firebase.notifications.Android.Channel('lotus', 'Lotus Channel', firebase.notifications.Android.Importance.Max).setDescription('Lotus Channel')
     firebase.notifications().android.createChannel(channel)
@@ -124,7 +121,7 @@ export default class SplashScreen extends Component {
     this.notificationListener()
   }*/
 
-  async componentDidUpdate(prevProps, prevState) {
+  componentDidUpdate(prevProps, prevState) {
     if (this.state.hydrated && !prevState.hydrated) {
       if ($.accounts.length) {
         this.resetNavigationTo('Home')
@@ -132,13 +129,11 @@ export default class SplashScreen extends Component {
         this.resetNavigationTo('Start')
       }
     } else {
-      console.log("this.resetNavigationTo('Home') failed")
+      console.log("SplashScreen init failed")
     }
   }
 
   render() {
-    return (
-      <Loader />
-    )
+    return <Loader />
   }
 }
