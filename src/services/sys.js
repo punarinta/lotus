@@ -5,7 +5,7 @@ import I18n from 'i18n'
 const delta = 1533194414684
 const base = 1008
 // TODO: toss before release
-const symbols = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z','0','1','2','3','4','5','6','7','8','9']
+const symbols = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z','#','1','2','3','4','5','6','7','8','9']
 const MBOX_OPEN = 'MBOX_OPEN'
 
 class SysSvc {

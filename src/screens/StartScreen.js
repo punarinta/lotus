@@ -1,10 +1,12 @@
 import React, { Component } from 'react'
-import { View, StyleSheet, Dimensions, Text, Animated, Keyboard } from 'react-native'
+import { View, StyleSheet, Dimensions, Text, Animated, Keyboard, TouchableOpacity } from 'react-native'
 import { NavigationActions, StackActions } from 'react-navigation'
 import Button from 'components/Button'
 import TextInput from 'components/TextInput'
+import VisualId from 'components/VisualId'
 import Theme from 'config/theme'
 import LogoSvg from 'components/svg/Logo'
+import RenewSvg from 'components/svg/Renew'
 import store from 'core/store'
 
 export default class StartScreen extends Component {
@@ -14,12 +16,15 @@ export default class StartScreen extends Component {
   sizeValue2 = new Animated.Value(width * 0.5)
 
   state = {
-    ok: false,
-    name: '',
-    email: '',
+    id: (new Date).getTime(),
+    name: 'Anon-' + Math.round((1000 + Math.random() * 8999)) + '',
+    nameWasChanged: false,
   }
 
   fieldFocused = () => {
+    if (!this.state.nameWasChanged) {
+      this.setState({name:'', nameWasChanged:true})
+    }
     Animated.timing(this.sizeValue, { toValue: 0, duration: 350 }).start()
     Animated.timing(this.sizeValue2, { toValue: 0, duration: 350 }).start()
     if (this.watchdog) clearTimeout(this.watchdog)
@@ -35,9 +40,13 @@ export default class StartScreen extends Component {
     }, 100)
   }
 
+  regenerate = () => {
+    this.setState({id: (new Date).getTime()})
+  }
+
   start = () => {
-    const { email, name } = this.state
-    $.accounts = [{ email, name }]
+    const { id, name } = this.state
+    $.accounts = [{ id, name }]
     store.sync()
     this.props.navigation.dispatch(StackActions.reset({index: 0, actions: [NavigationActions.navigate({routeName: 'Home'})]}))
   }
@@ -51,35 +60,34 @@ export default class StartScreen extends Component {
               <LogoSvg size={width * 0.3}/>
             </View>
           </Animated.View>
-          <TextInput
-            required
-            type="email"
-            title="email"
-            containerStyle={{width: width * 0.7, marginBottom: 8}}
-            returnKeyType="next"
-            onFocus={this.fieldFocused}
-            onBlur={this.fieldBlurred}
-            onSubmitEditing={() => this.refs.name.focus()}
-            blurOnSubmit={false}
-            onChange={(email, ok) => this.setState({email, ok})}
-          />
+          <View style={{flexDirection: 'row'}}>
+            <VisualId id={this.state.id} />
+            <TouchableOpacity onPress={this.regenerate} style={{justifyContent: 'center', marginLeft: 8}}>
+              <RenewSvg color={Theme.gray}/>
+            </TouchableOpacity>
+          </View>
           <TextInput
             ref="name"
             title="name"
+            value={this.state.name}
             onFocus={this.fieldFocused}
             onBlur={this.fieldBlurred}
             containerStyle={{width: width * 0.7}}
-            onChange={(name, ok) => this.setState({name})}
+            onChange={(name, ok) => {
+              this.setState({name, id: (new Date).getTime()})
+            }}
           />
           <Button
+            active={this.state.name.length}
             style={{marginTop: 32, width: width * 0.3}}
             caption="Start"
-            active={this.state.ok}
             onPress={this.start}
           />
         </View>
         <View style={styles.gap}/>
-        <Text style={styles.bottomMessage}>Lotus does not have any servers.</Text>
+        <Text style={styles.bottomMessage}>
+          Lotus does not have any servers, so it doesn't need your credentials either. However your may set a name to be shown when you connect to others.
+        </Text>
       </View>
     )
   }
@@ -114,5 +122,6 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     paddingHorizontal: 10,
     fontFamily: Theme.thinFont,
+    textAlign: 'center',
   },
 })
