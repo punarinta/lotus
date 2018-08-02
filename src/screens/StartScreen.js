@@ -72,8 +72,8 @@ export default class StartScreen extends Component {
             value={this.state.name}
             onFocus={this.fieldFocused}
             onBlur={this.fieldBlurred}
-            containerStyle={{width: width * 0.7}}
-            onChange={(name, ok) => {
+            containerStyle={{width: width * 0.7, marginTop: 8}}
+            onChange={(name) => {
               this.setState({name, id: (new Date).getTime()})
             }}
           />
@@ -86,7 +86,7 @@ export default class StartScreen extends Component {
         </View>
         <View style={styles.gap}/>
         <Text style={styles.bottomMessage}>
-          Lotus does not have any servers, so it doesn't need your credentials either. However your may set a name to be shown when you connect to others.
+          We value your privacy, so we do not ask questions. However your may want to set a name to be shown when you connect to others. The symbols above is your ID, colors and shapes matter too.
         </Text>
       </View>
     )
