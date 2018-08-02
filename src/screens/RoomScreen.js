@@ -107,21 +107,18 @@ export default class RoomScreen extends Component {
     pc.dataChannels = []
 
     pc.onicecandidate = (event) => {
-      // console.log('SIGNAL icecandidate')
-
       if (event.candidate) {
-
-        if (candyWatch) clearTimeout(candyWatch)
-        candyWatch = setTimeout(() => {
-          console.log(`Sending ${candidates.length} candidates...`)
-          this.pubsub.emit(null, 'exchange', {candidates})
-          candidates = []
-        }, 750)
-
         // TODO: control TCP skipping in options
-        if (event.candidate.candidate.includes(' udp ')) {
+      //  if (event.candidate.candidate.includes(' udp ')) {
           candidates.push(event.candidate)
-        }
+
+          if (candyWatch) clearTimeout(candyWatch)
+          candyWatch = setTimeout(() => {
+            console.log(`Sending ${candidates.length} candidates...`)
+            this.pubsub.emit(null, 'exchange', {candidates})
+            candidates = []
+          }, 500)
+      //  }
       }
     }
 
@@ -279,7 +276,7 @@ export default class RoomScreen extends Component {
       console.log('Adding candidates...')
 
       if (!this.peers[peerId].watchdog && pc.iWillRetry) {
-        this.peers[peerId].watchdog = setTimeout(this.peers[peerId].watchdogFunction, 5000)
+        this.peers[peerId].watchdog = setTimeout(this.peers[peerId].watchdogFunction, 8000)
       }
 
       for (const c of data.candidates) {

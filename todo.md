@@ -1,12 +1,15 @@
 To fix:
 * connection loss on phone off
+* thin font for iOS
+* push notifications on iOS
+* disable Firefox DB on iOS
 * 
 
 Prio features:
 * save last 100 messages in every chat
 * fetch messages posted when you were absent
-* add first profile dialog
-* add a chat
+* "add a room" dialog
+* message timestamps
 * 
 
 Other features:
@@ -17,7 +20,8 @@ Other features:
 * account switching
 * server federation (Redis and Redisless)
 * translations
-* settings page (TCP skipping, show-me-writing)
+* settings page (TCP skipping, show-me-writing, STUN server, signalling server)
 * update lastSeen on disconnect
 * show when somebody is writing
+* lotus.nisdos.com HTTPS signalling
 * 
