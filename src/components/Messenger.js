@@ -36,6 +36,9 @@ export default class Messenger extends Component {
         user = ProfileSvc.johnDoe()
       }
       this.addMessage(data, user.id)
+      setTimeout(() => {
+        this.refs.msgs.scrollToEnd()
+      }, 50)
     }
   }
 
