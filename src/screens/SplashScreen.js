@@ -27,7 +27,7 @@ export default class SplashScreen extends Component {
     }
   }
 
-  resetNavigationTo = (routeName) => {
+  resetNavigationTo(routeName) {
     return this.props.navigation.dispatch(StackActions.reset
     ({
       index: 0,

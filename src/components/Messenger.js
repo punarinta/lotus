@@ -4,6 +4,7 @@ import Theme from 'config/theme'
 import MessageRow from './MessageRow'
 import SendSvg from './svg/Send'
 import { ProfileSvc } from 'services/profile'
+import { MessageSvc } from 'services/message'
 
 // Messenger should take care of asyncstorage data I/O
 export default class Messenger extends Component {
@@ -13,18 +14,23 @@ export default class Messenger extends Component {
   }
 
   state = {
-    messages: [{body: 'My message', userId:null},{body: 'His message', userId:'usr'}],
-    msgsRenderState: null,
     toPost: '',
+    messages: [],
+    msgsRenderState: null,
   }
 
-  addMessage = (message, userId = null) => {
+  componentDidMount() {
+    MessageSvc.initRoom(this.props.roomId)
+  }
+
+  addMessage(message, userId = null) {
     const { messages } = this.state
     messages.push({
       body: message,
       userId,
     })
     this.setState({messages, msgsRenderState: Math.random()})
+    $.rooms[this.props.roomId].m = messages
   }
 
   takeData(chId, peerId, data) {

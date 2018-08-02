@@ -1,7 +1,6 @@
 import React, { Component } from 'react'
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native'
 import { RTCPeerConnection, RTCIceCandidate, RTCSessionDescription } from 'react-native-webrtc'
-import { NavigationActions, StackActions } from 'react-navigation'
 import Theme from 'config/theme'
 import { PubSub } from 'services/pubsub'
 import Messenger from 'components/Messenger'
@@ -31,17 +30,21 @@ export default class RoomScreen extends Component {
     return this.props.navigation.state && this.props.navigation.state.params ? this.props.navigation.state.params : {}
   }
 
-  initPubSub = async () => {
-    if (!this.navParams.peer || !$.accounts[0] || !$.accounts[0].id) {
-      return false
-    }
-
+  get roomId() {
     const
       hash1 = sha256($.accounts[0].id).substring(0, 32),
       hash2 = sha256(this.navParams.peer).substring(0, 32),
       bool = $.accounts[0].id > this.navParams.peer
 
-    this.pubsub = new PubSub(false, '46.101.117.47/', bool ? hash1 + hash2 : hash2 + hash1, { onSuggestedReopening: (code) => {
+    return bool ? hash1 + hash2 : hash2 + hash1
+  }
+
+  async initPubSub() {
+    if (!this.navParams.peer || !$.accounts[0] || !$.accounts[0].id) {
+      return false
+    }
+
+    this.pubsub = new PubSub(false, '46.101.117.47/', this.roomId, { onSuggestedReopening: (code) => {
       console.log('WARNING: onSuggestedReopening was triggered with error code ' + code)
       this.initPubSub()
     }})
@@ -87,13 +90,13 @@ export default class RoomScreen extends Component {
     }
   }
 
-  setPeerState = (peerId, newState) => {
+  setPeerState(peerId, newState) {
     const { connStates } = this.state
     connStates[peerId] = newState
     this.setState({connStates})
   }
 
-  createPC = (peerId, isOffer, userId = null) => {
+  createPC(peerId, isOffer, userId = null) {
     const pc = new RTCPeerConnection(webRTCConfig)
 
     if (userId) {
@@ -220,7 +223,7 @@ export default class RoomScreen extends Component {
     }
   }
 
-  onDataRead = (chId, peerId, data) => {
+  onDataRead(chId, peerId, data) {
 
     console.log('DATA READ', chId, peerId, data)
 
@@ -247,7 +250,7 @@ export default class RoomScreen extends Component {
     }
   }
 
-  createOffer = async (peerId) => {
+  async createOffer(peerId) {
     const pc = this.peers[peerId]
     await pc.setLocalDescription(await pc.createOffer())
     this.pubsub.emit(peerId, 'exchange', {sdp: pc.localDescription, userId: $.accounts[0].id})
@@ -292,8 +295,6 @@ export default class RoomScreen extends Component {
       if (this.peers[i].watchdog) clearTimeout(this.peers[i].watchdog)
       this.peers[i].close()
     }
-
-    // this.props.navigation.dispatch(StackActions.reset({index: 0, actions: [NavigationActions.navigate({routeName: 'Home'})]}))
   }
 
   render() {
@@ -321,6 +322,7 @@ export default class RoomScreen extends Component {
         </View>
         <Messenger
           ref="msg"
+          roomId={this.roomId}
           onNewData={this.dataSend}
         />
         {

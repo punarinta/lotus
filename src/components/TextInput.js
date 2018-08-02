@@ -44,7 +44,7 @@ export default class TextInput extends Component {
     this.refs.input.focus()
   }
 
-  handleOnChange = (text) => {
+  handleOnChange(text) {
 
     if (typeof text === 'undefined' || text === null) {
       return
