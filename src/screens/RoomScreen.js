@@ -160,7 +160,7 @@ export default class RoomScreen extends Component {
         }
         this.setPeerState(peerId, 'offline')
       } else {
-        this.setPeerState(peerId, pc.iceConnectionState)
+        this.setPeerState(peerId, pc.iceConnectionState === 'completed' ? 'connected' : pc.iceConnectionState)
       }
     }
 

@@ -68,6 +68,7 @@ export default class Messenger extends Component {
           renderItem={(item) => <MessageRow {...item.item}/>}
           extraData={msgsRenderState}
           keyExtractor={(item, index) => index + ''}
+          bounces={false}
         />
 
         <View style={styles.bottomBar}>
