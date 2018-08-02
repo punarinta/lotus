@@ -257,6 +257,7 @@ export default class RoomScreen extends Component {
   }
 
   exchange = async (data) => {
+    // https://www.w3.org/TR/webrtc/#simple-peer-to-peer-example
     // console.log('EVENT exchange', data)
     const peerId = data.rtcFrom
     const pc = this.peers[peerId] ? this.peers[peerId] : this.createPC(peerId, false, data.userId)
@@ -265,7 +266,6 @@ export default class RoomScreen extends Component {
 
       if (data.sdp.type === 'offer') {
         await pc.setRemoteDescription(new RTCSessionDescription(data.sdp))
-
         await pc.setLocalDescription(await pc.createAnswer())
         this.pubsub.emit(peerId, 'exchange', {sdp: pc.localDescription})
       } else if (data.sdp.type === 'answer') {
@@ -273,14 +273,6 @@ export default class RoomScreen extends Component {
       } else {
         console.log('Unsupported SDP type. Your code may differ here.')
       }
-
-
-    /*  await pc.setRemoteDescription(new RTCSessionDescription(data.sdp))
-      if (data.sdp.type === 'offer') {
-        const answer = await pc.createAnswer()
-        pc.setLocalDescription(answer)
-        this.pubsub.emit(peerId, 'exchange', {sdp: answer})
-      }*/
     }
 
     if (data.candidates) {

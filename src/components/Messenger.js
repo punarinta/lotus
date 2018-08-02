@@ -107,6 +107,7 @@ const styles = StyleSheet.create({
     backgroundColor: Theme.white,
     height: 48,
     flex: 1,
+    paddingLeft: Platform.OS === 'ios' ? 8 : 4,
   },
   postButtons: {
     backgroundColor: Theme.white,
