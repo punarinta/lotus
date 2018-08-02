@@ -69,9 +69,9 @@ export default class SplashScreen extends Component {
     }
 
     if (Platform.OS === 'ios') {
-      $.phonebook['android@lotus.test'] = { name: 'Android phone' }
+      $.phonebook['1533205457001'] = { name: 'Android phone' }
     } else {
-      $.phonebook['ios@lotus.test'] = { name: 'iOS phone' }
+      $.phonebook['1533205457000'] = { name: 'iOS phone' }
     }
     // TODO: end remove
 
