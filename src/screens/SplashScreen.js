@@ -33,7 +33,7 @@ export default class SplashScreen extends Component {
     }))
   }
 
-  async componentWillMount() {
+  async componentDidMount() {
 
     if (!await firebase.messaging().hasPermission()) {
       try {
