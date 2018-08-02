@@ -57,21 +57,21 @@ export default class SplashScreen extends Component {
     // TODO: remove before release
     $.accounts = [
       Platform.OS === 'ios' ?
-        { email: 'ios@lotus.test', name: 'iOS phone' }
+        { id: '1533205457000', name: 'iOS phone' }
         :
-        { email: 'android@lotus.test', name: 'Android phone' }
+        { id: '1533205457001', name: 'Android phone' }
     ]
 
     $.phonebook = {
-      'phillip.horton@mail.test': {name: 'Phillip Horton'},
-      'ronald.pierce@user.test': {name: 'Ronald Pierce'},
-      'mike.hudson@user.test': {name: 'Mike Hudson'},
+      '1533205457010': { name: 'Phillip Horton' },
+      '1533205457011': { name: 'Ronald Pierce' },
+      '1533205457012': { name: 'Mike Hudson' },
     }
 
     if (Platform.OS === 'ios') {
-      $.phonebook['android@lotus.test'] = {name: 'Android phone'}
+      $.phonebook['android@lotus.test'] = { name: 'Android phone' }
     } else {
-      $.phonebook['ios@lotus.test'] = {name: 'iOS phone'}
+      $.phonebook['ios@lotus.test'] = { name: 'iOS phone' }
     }
     // TODO: end remove
 

@@ -32,14 +32,14 @@ export default class RoomScreen extends Component {
   }
 
   initPubSub = async () => {
-    if (!this.navParams.peer || !$.accounts[0] || !$.accounts[0].email) {
+    if (!this.navParams.peer || !$.accounts[0] || !$.accounts[0].id) {
       return false
     }
 
     const
-      hash1 = sha256($.accounts[0].email).substring(0, 32),
+      hash1 = sha256($.accounts[0].id).substring(0, 32),
       hash2 = sha256(this.navParams.peer).substring(0, 32),
-      bool = $.accounts[0].email > this.navParams.peer
+      bool = $.accounts[0].id > this.navParams.peer
 
     this.pubsub = new PubSub(false, '46.101.117.47/', bool ? hash1 + hash2 : hash2 + hash1, { onSuggestedReopening: (code) => {
       console.log('WARNING: onSuggestedReopening was triggered with error code ' + code)
@@ -69,7 +69,7 @@ export default class RoomScreen extends Component {
     }
 
     // tell everyone in the chat that you join with ID $.sessionId
-    this.pubsub.emit(null, 'join', [$.sessionId, $.accounts[0].email])
+    this.pubsub.emit(null, 'join', [$.sessionId, $.accounts[0].id])
   }
 
   componentWillUnmount() {
@@ -242,7 +242,7 @@ export default class RoomScreen extends Component {
         case 'syncResp':
           // this is a short profile -- {id, name}
           json.info.lastSeen = (new Date).getTime()
-          ProfileSvc.update(json.info.email, json.info)
+          ProfileSvc.update(json.info.id, json.info)
           break
 
         default:
@@ -254,7 +254,7 @@ export default class RoomScreen extends Component {
     const pc = this.peers[peerId]
     const offer = await pc.createOffer()
     pc.setLocalDescription(offer)
-    this.pubsub.emit(peerId, 'exchange', {sdp: offer, userId: $.accounts[0].email})
+    this.pubsub.emit(peerId, 'exchange', {sdp: offer, userId: $.accounts[0].id})
   }
 
   exchange = async (data) => {

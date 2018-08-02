@@ -46,7 +46,7 @@ export default class StartScreen extends Component {
 
   start = () => {
     const { id, name } = this.state
-    $.accounts = [{ id, name }]
+    $.accounts = [{ id: id + '', name }]
     store.sync()
     this.props.navigation.dispatch(StackActions.reset({index: 0, actions: [NavigationActions.navigate({routeName: 'Home'})]}))
   }
