@@ -51,6 +51,7 @@ export default class SplashScreen extends Component {
       resetNavigationTo: this.resetNavigationTo,
       sessionId: (Math.random() + '').replace('0.', ''),
       phonebook: {},
+      rooms: {},
       accounts: [],
     }, $)
 
