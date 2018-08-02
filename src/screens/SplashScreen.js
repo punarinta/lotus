@@ -22,7 +22,9 @@ export default class SplashScreen extends Component {
   constructor(props) {
     super(props)
     StatusBar.setBarStyle('dark-content')
-    StatusBar.setBackgroundColor(Theme.white)
+    if (Platform.OS === 'android') {
+      StatusBar.setBackgroundColor(Theme.white)
+    }
   }
 
   resetNavigationTo = (routeName) => {
