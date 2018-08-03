@@ -22,8 +22,8 @@ export default class RoomScreen extends Component {
 
     this.state = {
       isAVOn: false,
-      remoteStreams: {},
       connStates: {},
+      remoteStreams: {},
     }
   }
 
@@ -331,7 +331,7 @@ export default class RoomScreen extends Component {
               { peerUser ? peerUser.name : this.navParams.peer }
             </Text>
             <Text style={styles.statusText}>
-              { connStates[peerUser.peerId] || 'unknown' }
+              { connStates[peerUser.peerId] || 'offline' }
             </Text>
           </View>
 
