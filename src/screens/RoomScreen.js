@@ -190,13 +190,13 @@ export default class RoomScreen extends Component {
 
     pc.watchdogFunction = (dontCompare = false) => {
       console.log('Watchdog fired for state ' + this.state.connStates[peerId])
-      if ((['failed', 'closed', 'connecting'].includes(this.state.connStates[peerId]) || dontCompare)) {
+    /*  if ((['failed', 'closed', 'connecting'].includes(this.state.connStates[peerId]) || dontCompare)) {
         pc.close()
         delete this.peers[peerId]
         this.setPeerState(peerId, null)
         console.log('Retrying for peer ' + peerId)
         this.createPC(peerId, true)
-      }
+      }*/
     }
 
     ['text', 'aux'].forEach((chName, id) => {
@@ -286,7 +286,7 @@ export default class RoomScreen extends Component {
       }
 
       for (const c of data.candidates) {
-        pc.addIceCandidate(new RTCIceCandidate(c))
+        await pc.addIceCandidate(new RTCIceCandidate(c))
       }
     }
   }
