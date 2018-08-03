@@ -144,7 +144,7 @@ export default class RoomScreen extends Component {
           clearTimeout(this.peers[peerId].watchdog)
         }
         const peerUser = ProfileSvc.findByPeerId(peerId)
-        this.dataSend(1, peerId, JSON.stringify({cmd: 'syncReq', lastSeen: peerUser ? peerUser.lastSeen : null}))
+        this.dataSend(1, peerId, JSON.stringify({cmd: 'syncReq', lastSeen: peerUser.lastSeen ? peerUser.lastSeen : null}))
       }
       if (pc.iceConnectionState === 'checking') {
         if (pc.iWillRetry) {
