@@ -239,7 +239,7 @@ export default class RoomScreen extends Component {
           const msgsToSync = MessageSvc.getFromTs(this.roomId, null, json.lastSeen)
           console.log('msgsToSync', json.lastSeen, msgsToSync)
           for (const m of msgsToSync) {
-            this.dataSend(0, peerId, m.body)
+            this.dataSend(0, peerId, m)
           }
           break
 
