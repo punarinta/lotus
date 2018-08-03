@@ -119,6 +119,22 @@ class ProfileSvc {
       id,
     }
   }
+
+  /**
+   * The same as update, but user peerId as a key
+   *
+   * @param peerId
+   * @param info
+   * @returns {*}
+   */
+  static updateByPeerId(peerId, info) {
+    for (const id in $.phonebook) {
+      if ($.phonebook[id].peerId === peerId) {
+        return ProfileSvc.set(id, info)
+      }
+    }
+    return null
+  }
 }
 
 export { ProfileSvc }

@@ -156,10 +156,8 @@ export default class RoomScreen extends Component {
       }
 
       if (pc.iceConnectionState === 'disconnected') {
-        const peerUser = ProfileSvc.findByPeerId(peerId)
-        if (peerUser) {
-          ProfileSvc.update(peerUser.id, {lastSeen: (new Date).getTime()})
-        }
+        // this is doubtful
+        ProfileSvc.updateByPeerId(peerId, {lastSeen: (new Date).getTime()})
         this.setPeerState(peerId, 'offline')
       } else {
         this.setPeerState(peerId, pc.iceConnectionState === 'completed' ? 'connected' : pc.iceConnectionState)
@@ -233,6 +231,8 @@ export default class RoomScreen extends Component {
 
     console.log('DATA READ', chId, peerId, data)
 
+    ProfileSvc.updateByPeerId(peerId, {lastSeen: (new Date).getTime()})
+
     // hardcode data channel subscribers
     if (this.refs.msg) this.refs.msg.takeData(chId, peerId, data)
 
@@ -252,7 +252,6 @@ export default class RoomScreen extends Component {
 
         case 'syncResp':
           // this is a short profile -- {id, name}
-          json.info.lastSeen = (new Date).getTime()
           ProfileSvc.update(json.info.id, json.info)
           break
 
