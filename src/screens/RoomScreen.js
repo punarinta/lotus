@@ -6,6 +6,7 @@ import { PubSub } from 'services/pubsub'
 import Messenger from 'components/Messenger'
 import AVModal from 'modals/AVModal'
 import { ProfileSvc } from 'services/profile'
+import { MessageSvc } from 'services/message'
 import I18n from 'i18n'
 import { sha256 } from 'js-sha256'
 import HomeSvg from 'components/svg/Home'
@@ -99,9 +100,7 @@ export default class RoomScreen extends Component {
   createPC(peerId, isOffer, userId = null) {
     const pc = new RTCPeerConnection(webRTCConfig)
 
-    if (userId) {
-      ProfileSvc.update(userId, {peerId})
-    }
+    ProfileSvc.update(userId, {peerId, lastSeen: (new Date).getTime()})
 
     let candidates = []
     let candyWatch = null
@@ -236,7 +235,11 @@ export default class RoomScreen extends Component {
         case 'syncReq':
           // send a short profile only -- {id, name}
           // TODO: if json.lastSeen < $.accounts[0].lastUpd => send full profile
-          this.dataSend(1, peerId, JSON.stringify({cmd: 'syncResp', info: $.accounts[0]}))
+        //  this.dataSend(1, peerId, JSON.stringify({cmd: 'syncResp', info: $.accounts[0]}))
+          const msgsToSync = MessageSvc.getFromTs(this.roomId, null, json.lastSeen)
+          for (const m of msgsToSync) {
+            this.dataSend(0, peerId, m.body)
+          }
           break
 
         case 'syncResp':
@@ -279,7 +282,7 @@ export default class RoomScreen extends Component {
       console.log('Adding candidates...')
 
       if (!this.peers[peerId].watchdog && pc.iWillRetry) {
-        this.peers[peerId].watchdog = setTimeout(this.peers[peerId].watchdogFunction, 8000)
+        this.peers[peerId].watchdog = setTimeout(this.peers[peerId].watchdogFunction, 7500)
       }
 
       for (const c of data.candidates) {

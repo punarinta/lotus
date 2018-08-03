@@ -5,6 +5,8 @@ import I18n from 'i18n'
 class MessageSvc {
 
   /**
+   * Inits a room
+   *
    * @param roomId
    * @returns {Promise<void>}
    */
@@ -13,6 +15,26 @@ class MessageSvc {
     $.rooms[roomId] = raw === null ? {m:[]} : JSON.parse(raw)
   }
 
+  /**
+   * Gets a list of messages after specified timestamp (FIFO)
+   *
+   * @param roomId
+   * @param userId
+   * @param ts
+   * @returns {Array}
+   */
+  static getFromTs(roomId, userId, ts) {
+    const msgs = []
+    if (!$.rooms[roomId] || !$.rooms[roomId].m) return msgs
+
+    for (const m of $.rooms[roomId].m.slice().reverse()) {
+      if (m.ts > ts) {
+        msgs.unshift(m.body)
+      } else {
+        break
+      }
+    }
+  }
 }
 
 export { MessageSvc }

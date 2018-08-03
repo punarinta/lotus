@@ -28,6 +28,7 @@ export default class Messenger extends Component {
     messages.push({
       body: message,
       userId,
+      ts: (new Date).getDate(),
     })
     this.setState({messages, msgsRenderState: Math.random()})
     $.rooms[this.props.roomId].m = messages
