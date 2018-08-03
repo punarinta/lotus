@@ -23,13 +23,9 @@ export default class Messenger extends Component {
     MessageSvc.initRoom(this.props.roomId)
   }
 
-  addMessage(message, userId = null) {
+  addMessage(message) {
     const { messages } = this.state
-    messages.push({
-      body: message,
-      userId,
-      ts: (new Date).getTime(),
-    })
+    messages.push(message)
     this.setState({messages, msgsRenderState: Math.random()})
     $.rooms[this.props.roomId].m = messages
   }
@@ -42,7 +38,7 @@ export default class Messenger extends Component {
       if (!user) {
         user = ProfileSvc.johnDoe()
       }
-      this.addMessage(data, user.id)
+      this.addMessage({...data, userId: user.id})
       setTimeout(() => {
         this.refs.msgs.scrollToEnd()
       }, 50)
@@ -53,7 +49,7 @@ export default class Messenger extends Component {
     const { toPost } = this.state
 
     if (toPost.length) {
-      this.addMessage(toPost)
+      this.addMessage({body: toPost, ts: (new Date).getTime(), userId: null})
       this.props.onNewData(0, null, toPost)
       this.setState({clearPostbox: true, toPost: ''})
       this.refs.msgs.scrollToEnd()

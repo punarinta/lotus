@@ -144,7 +144,7 @@ export default class RoomScreen extends Component {
           clearTimeout(this.peers[peerId].watchdog)
         }
         const peerUser = ProfileSvc.findByPeerId(peerId)
-        this.dataSend(1, peerId, JSON.stringify({cmd: 'syncReq', lastSeen: peerUser.lastSeen ? peerUser.lastSeen : null}))
+        this.dataSend(1, peerId, {cmd: 'syncReq', lastSeen: peerUser.lastSeen ? peerUser.lastSeen : null})
       }
       if (pc.iceConnectionState === 'checking') {
         if (pc.iWillRetry) {
@@ -214,6 +214,8 @@ export default class RoomScreen extends Component {
 
   dataSend = (chId, peerId, data) => {
 
+    if (typeof data !== 'string') data = JSON.stringify(data)
+
     for (const i in this.peers) {
       if (peerId === null || i === peerId) {
         console.log('DATA SENT', chId, peerId, data)
@@ -235,7 +237,7 @@ export default class RoomScreen extends Component {
         case 'syncReq':
           // send a short profile only -- {id, name}
           // TODO: if json.lastSeen < $.accounts[0].lastUpd => send full profile
-          this.dataSend(1, peerId, JSON.stringify({cmd: 'syncResp', info: $.accounts[0]}))
+          this.dataSend(1, peerId, {cmd: 'syncResp', info: $.accounts[0]})
           const msgsToSync = MessageSvc.getFromTs(this.roomId, null, json.lastSeen)
           console.log('msgsToSync', json.lastSeen, msgsToSync)
           for (const m of msgsToSync) {

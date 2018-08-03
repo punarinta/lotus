@@ -7,7 +7,6 @@ To fix:
 
 Prio features:
 * save last 100 messages in every chat
-* fetch messages posted when you were absent
 * "add a room" dialog
 * message timestamps
 * 

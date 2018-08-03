@@ -1,5 +1,6 @@
 import React, { Component } from 'react'
 import { View, Text, StyleSheet } from 'react-native'
+import { MessageSvc } from 'services/message'
 import Theme from 'config/theme'
 
 export default class MessageRow extends Component {
@@ -10,7 +11,9 @@ export default class MessageRow extends Component {
   }
 
   render() {
-    const isMe = this.props.userId === null
+    const
+      isMe = this.props.userId === null,
+      ts = MessageSvc.readableTs(this.props.ts)
 
     return (
       <View style={[styles.container, {justifyContent: isMe ? 'flex-end' : 'flex-start'}]}>
@@ -18,6 +21,7 @@ export default class MessageRow extends Component {
           <Text style={isMe ? styles.bodyLocal : styles.bodyRemote}>
             { this.props.body }
           </Text>
+          <Text style={styles.ts}>{ ts }</Text>
         </View>
       </View>
     )
@@ -31,12 +35,12 @@ const styles = StyleSheet.create({
     marginVertical: 8,
   },
   bubble: {
-    padding: 8,
+    paddingVertical: 4,
+    paddingHorizontal: 8,
     borderRadius: 6,
     borderColor: Theme.gray,
     borderWidth: StyleSheet.hairlineWidth,
     backgroundColor: Theme.white,
-    // elevation: 1, // android
   },
   bblLocal: {
     marginLeft: 64,
@@ -50,8 +54,16 @@ const styles = StyleSheet.create({
   },
   bodyLocal: {
     color: Theme.black,
+    textAlign: 'right',
   },
   bodyRemote: {
     color: Theme.black,
+  },
+  ts: {
+    marginTop: 2,
+    color: Theme.gray,
+    fontSize: 10,
+    fontFamily: Theme.thinFont,
+    textAlign: 'right',
   },
 })

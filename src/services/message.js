@@ -40,6 +40,25 @@ class MessageSvc {
 
     return msgs
   }
+
+  /**
+   * Creates a nice timestamp
+   *
+   * @param ts
+   * @returns {string}
+   */
+  static readableTs(ts) {
+    const
+      td = new Date,
+      nums = num => num > 9 ? num : '0' + num
+
+    let lastSeen = new Date(ts)
+    if (td.getDate() === lastSeen.getDate() && td.getMonth() === lastSeen.getMonth() && td.getFullYear() === lastSeen.getFullYear()) {
+      return nums(lastSeen.getHours()) + ':' + nums(lastSeen.getMinutes())
+    } else {
+      return I18n.t('monthsShort')[lastSeen.getHours()] + ' ' + nums(lastSeen.getDate())
+    }
+  }
 }
 
 export { MessageSvc }

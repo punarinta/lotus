@@ -14,6 +14,7 @@ export default class ChatsList extends PureComponent {
         data={this.props.items}
         renderItem={(item) => <ChatRow {...item.item} />}
         keyExtractor={(item, index) => index + ''}
+        bounces={false}
       />
     )
   }
