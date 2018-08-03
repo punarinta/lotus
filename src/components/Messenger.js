@@ -32,7 +32,8 @@ export default class Messenger extends Component {
 
   takeData(chId, peerId, data) {
     if (chId === 0) {
-      console.log('Push message', data)
+      console.log('Push message', data, peerId)
+      if (typeof data === 'string') data = JSON.parse(string)
       // text message incoming => get userId from peerId
       let user = ProfileSvc.findByPeerId(peerId)
       if (!user) {
