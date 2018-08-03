@@ -260,7 +260,7 @@ export default class RoomScreen extends Component {
       await pc.setLocalDescription(await pc.createOffer())
       this.pubsub.emit(peerId, 'exchange', {sdp: pc.localDescription, userId: $.accounts[0].id})
     } catch (err) {
-      console.error('ACHTUNG 1', err)
+      console.log('ACHTUNG 1', err)
     }
   }
 
