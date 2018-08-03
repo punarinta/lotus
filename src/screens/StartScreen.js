@@ -8,6 +8,7 @@ import Theme from 'config/theme'
 import LogoSvg from 'components/svg/Logo'
 import RenewSvg from 'components/svg/Renew'
 import store from 'core/store'
+import I18n from "../i18n"
 
 export default class StartScreen extends Component {
 
@@ -17,7 +18,7 @@ export default class StartScreen extends Component {
 
   state = {
     id: (new Date).getTime(),
-    name: 'Anon-' + Math.round((1000 + Math.random() * 8999)) + '',
+    name: I18n.t('start.anon') + Math.round((1000 + Math.random() * 8999)) + '',
     nameWasChanged: false,
   }
 
@@ -80,14 +81,12 @@ export default class StartScreen extends Component {
           <Button
             active={this.state.name.length}
             style={{marginTop: 32, width: width * 0.3}}
-            caption="Start"
+            caption={I18n.t('buttons.start')}
             onPress={this.start}
           />
         </View>
         <View style={styles.gap}/>
-        <Text style={styles.bottomMessage}>
-          We value your privacy, so we do not ask questions. However your may want to set a name to be shown when you connect to others. The symbols above is your ID, colors and shapes matter too.
-        </Text>
+        <Text style={styles.bottomMessage}>{ I18n.t('start.privacyNotice') }</Text>
       </View>
     )
   }
