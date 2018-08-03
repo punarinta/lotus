@@ -28,12 +28,14 @@ class MessageSvc {
     if (!$.rooms[roomId] || !$.rooms[roomId].m) return msgs
 
     for (const m of $.rooms[roomId].m.slice().reverse()) {
-      if (m.ts > ts) {
+      if (m.ts > ts && m.userId === userId) {
         msgs.unshift(m.body)
       } else {
         break
       }
     }
+
+    return msgs
   }
 }
 
