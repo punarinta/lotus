@@ -49,8 +49,9 @@ export default class Messenger extends Component {
     const { toPost } = this.state
 
     if (toPost.length) {
-      this.addMessage({body: toPost, ts: (new Date).getTime(), userId: null})
-      this.props.onNewData(0, null, toPost)
+      const message = {body: toPost, ts: (new Date).getTime()}
+      this.addMessage({...message, userId: null})
+      this.props.onNewData(0, null, message)
       this.setState({clearPostbox: true, toPost: ''})
       this.refs.msgs.scrollToEnd()
     }

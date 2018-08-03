@@ -216,6 +216,11 @@ export default class RoomScreen extends Component {
 
     if (typeof data !== 'string') data = JSON.stringify(data)
 
+    if (typeof data !== 'string') {
+      console.log('Err data format (must be String, ArrayBuffer or ArrayBufferView):', data)
+      return
+    }
+
     for (const i in this.peers) {
       if (peerId === null || i === peerId) {
         console.log('DATA SENT', chId, peerId, data)
@@ -241,7 +246,7 @@ export default class RoomScreen extends Component {
           const msgsToSync = MessageSvc.getFromTs(this.roomId, null, json.lastSeen)
           console.log('msgsToSync', json.lastSeen, msgsToSync)
           for (const m of msgsToSync) {
-            this.dataSend(0, peerId, m.body)
+            this.dataSend(0, peerId, m)
           }
           break
 
