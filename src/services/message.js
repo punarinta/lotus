@@ -25,13 +25,14 @@ class MessageSvc {
    */
   static getFromTs(roomId, userId, ts) {
     const msgs = []
-    if (!$.rooms[roomId] || !$.rooms[roomId].m) {console.log('A1', $.rooms); return msgs}
+    if (!ts) return $.rooms[roomId].m
+    if (!$.rooms[roomId] || !$.rooms[roomId].m) return msgs
 
-    console.log('A2', $.rooms, $.rooms[roomId].m.slice().reverse())
+    // console.log('A2', $.rooms, $.rooms[roomId].m.slice().reverse())
 
     for (const m of $.rooms[roomId].m.slice().reverse()) {
       if (m.ts > ts && m.userId === userId) {
-        msgs.unshift(m.body)
+        msgs.unshift(m)
       } else {
         break
       }
