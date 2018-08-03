@@ -95,8 +95,10 @@ class ProfileSvc {
    * @param info
    */
   static set(id, info) {
-    $.phonebook[id] = info
-    store.sync()
+    if (id) {
+      $.phonebook[id] = info
+      store.sync()
+    }
   }
 
   /**

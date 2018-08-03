@@ -10,12 +10,13 @@ import { MessageSvc } from 'services/message'
 import I18n from 'i18n'
 import { sha256 } from 'js-sha256'
 import HomeSvg from 'components/svg/Home'
+import store from 'core/store'
 
 const webRTCConfig = {iceCandidatePoolSize: 16, 'iceServers': [{'urls': 'stun:stun.l.google.com:19302'}]}
 
 export default class RoomScreen extends Component {
 
-  pubsub = null
+  transport = null
 
   constructor(props) {
     super(props)
@@ -40,40 +41,40 @@ export default class RoomScreen extends Component {
     return bool ? hash1 + hash2 : hash2 + hash1
   }
 
-  async initPubSub() {
+  async initTransport() {
     if (!this.navParams.peer || !$.accounts[0] || !$.accounts[0].id) {
       return false
     }
 
-    this.pubsub = new PubSub(false, '46.101.117.47/', this.roomId, { onSuggestedReopening: (code) => {
+    this.transport = new PubSub(false, '46.101.117.47/', this.roomId, { onSuggestedReopening: (code) => {
       console.log('WARNING: onSuggestedReopening was triggered with error code ' + code)
-      this.initPubSub()
+      this.initTransport()
     }})
 
-    if (!await this.pubsub.init()) {
-      console.log('PubSub server connection failure')
+    if (!await this.transport.init()) {
+      console.log('Transport server connection failure')
       return false
     }
 
-    this.pubsub.on('join', ([peerId, userId]) => {
+    this.transport.on('join', ([peerId, userId]) => {
       this.createPC(peerId, true, userId)
     })
 
-    this.pubsub.on('exchange', this.exchange)
+    this.transport.on('exchange', this.exchange)
     return true
   }
 
   async componentDidMount() {
 
     this.peers = {}
-    if (!this.pubsub) {
-      if (!await this.initPubSub()) {
+    if (!this.transport) {
+      if (!await this.initTransport()) {
         return false
       }
     }
 
     // tell everyone in the chat that you join with ID $.sessionId
-    this.pubsub.emit(null, 'join', [$.sessionId, $.accounts[0].id])
+    this.transport.emit(null, 'join', [$.sessionId, $.accounts[0].id])
   }
 
   componentWillUnmount() {
@@ -117,7 +118,7 @@ export default class RoomScreen extends Component {
           if (candyWatch) clearTimeout(candyWatch)
           candyWatch = setTimeout(() => {
             console.log(`Sending ${candidates.length} candidates...`)
-            this.pubsub.emit(null, 'exchange', {candidates})
+            this.transport.emit(null, 'exchange', {candidates})
             candidates = []
           }, 500)
       //  }
@@ -264,7 +265,7 @@ export default class RoomScreen extends Component {
     const pc = this.peers[peerId]
     try {
       await pc.setLocalDescription(await pc.createOffer())
-      this.pubsub.emit(peerId, 'exchange', {sdp: pc.localDescription, userId: $.accounts[0].id})
+      this.transport.emit(peerId, 'exchange', {sdp: pc.localDescription, userId: $.accounts[0].id})
     } catch (err) {
       console.log('ACHTUNG 1', err)
     }
@@ -282,7 +283,7 @@ export default class RoomScreen extends Component {
         if (data.sdp.type === 'offer') {
           await pc.setRemoteDescription(new RTCSessionDescription(data.sdp))
           await pc.setLocalDescription(await pc.createAnswer())
-          this.pubsub.emit(peerId, 'exchange', {sdp: pc.localDescription})
+          this.transport.emit(peerId, 'exchange', {sdp: pc.localDescription})
         } else if (data.sdp.type === 'answer') {
           await pc.setRemoteDescription(new RTCSessionDescription(data.sdp))
         } else {
@@ -311,12 +312,13 @@ export default class RoomScreen extends Component {
   }
 
   leaveChat = () => {
-    if (this.pubsub) this.pubsub.close()
+    if (this.transport) this.transport.close()
     if (this.state.isAVOn && this.refs.av) this.refs.av.close()
     for (const i in this.peers) {
       if (this.peers[i].watchdog) clearTimeout(this.peers[i].watchdog)
       this.peers[i].close()
     }
+    store.emit('ROOMS_UPDATED')
   }
 
   render() {

@@ -1,5 +1,6 @@
 import { store } from 'core'
 import I18n from 'i18n'
+import { RTCPeerConnection } from 'react-native-webrtc'
 
 // TODO: update before release
 const delta = 1533194414684
@@ -108,6 +109,39 @@ class SysSvc {
     const string = SysSvc.padStart(int + '', 12, '0').split('').reverse().join('')
 
     return (string - 0) + delta
+  }
+
+  /**
+   * Pings a STUN server
+   *
+   * @param server
+   * @param timeout
+   * @returns {Promise<any>}
+   */
+  static pingStun(server, timeout = 3000) {
+    const ts1 = (new Date).getTime()
+    const candies = []
+
+    return Promise.race([
+      new Promise(async (resolve) => {
+        const pc = new RTCPeerConnection({iceServers:[{'urls': 'stun:' + server}]})
+        pc.onicecandidate = (event) => {
+          candies.push(event.candidate)
+        }
+        pc.onicegatheringstatechange = () => {
+          if (pc.iceGatheringState === 'complete') {
+            const ts2 = (new Date).getTime()
+            pc.close()
+            resolve([0, ts2 - ts1, candies.length])
+          }
+        }
+        const desc = await pc.createOffer({offerToReceiveAudio: 1})
+        pc.setLocalDescription(desc)
+      }),
+      new Promise((resolve) =>
+        setTimeout(() => resolve([1, timeout, candies.length]), timeout)
+      )
+    ])
   }
 }
 

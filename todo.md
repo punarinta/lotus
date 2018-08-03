@@ -2,13 +2,11 @@ To fix:
 * connection loss on phone off
 * thin font for iOS
 * push notifications on iOS
-* disable Firefox DB on iOS
 * 
 
 Prio features:
 * save last 100 messages in every chat
 * "add a room" dialog
-* message timestamps
 * 
 
 Other features:
@@ -23,4 +21,6 @@ Other features:
 * update lastSeen on disconnect
 * show when somebody is writing
 * lotus.nisdos.com HTTPS signalling
+* optimize dumps to AsyncStorage
+* hostility monitor
 * 
