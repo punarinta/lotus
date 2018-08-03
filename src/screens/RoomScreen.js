@@ -147,12 +147,12 @@ export default class RoomScreen extends Component {
         this.dataSend(1, peerId, JSON.stringify({cmd: 'syncReq', lastSeen: peerUser ? peerUser.lastSeen : null}))
       }
       if (pc.iceConnectionState === 'checking') {
-        if (pc.iWillRetry) {
+        /*if (pc.iWillRetry) {
           if (pc.watchdog) {
             clearTimeout(pc.watchdog)
           }
           pc.watchdog = setTimeout(pc.watchdogFunction, 10000, true)
-        }
+        }*/
       }
 
       if (pc.iceConnectionState === 'disconnected') {
@@ -190,13 +190,13 @@ export default class RoomScreen extends Component {
 
     pc.watchdogFunction = (dontCompare = false) => {
       console.log('Watchdog fired for state ' + this.state.connStates[peerId])
-    /*  if ((['failed', 'closed', 'connecting'].includes(this.state.connStates[peerId]) || dontCompare)) {
+      if ((['failed', 'closed', 'connecting'].includes(this.state.connStates[peerId]) || dontCompare)) {
         pc.close()
         delete this.peers[peerId]
         this.setPeerState(peerId, null)
         console.log('Retrying for peer ' + peerId)
         this.createPC(peerId, true)
-      }*/
+      }
     }
 
     ['text', 'aux'].forEach((chName, id) => {
@@ -265,28 +265,36 @@ export default class RoomScreen extends Component {
     const peerId = data.rtcFrom
     const pc = this.peers[peerId] ? this.peers[peerId] : this.createPC(peerId, false, data.userId)
 
-    if (data.sdp) {
+    try {
+      if (data.sdp) {
 
-      if (data.sdp.type === 'offer') {
-        await pc.setRemoteDescription(new RTCSessionDescription(data.sdp))
-        await pc.setLocalDescription(await pc.createAnswer())
-        this.pubsub.emit(peerId, 'exchange', {sdp: pc.localDescription})
-      } else if (data.sdp.type === 'answer') {
-        await pc.setRemoteDescription(new RTCSessionDescription(data.sdp))
-      } else {
-        console.log('Unsupported SDP type. Your code may differ here.')
+        if (data.sdp.type === 'offer') {
+          await pc.setRemoteDescription(new RTCSessionDescription(data.sdp))
+          await pc.setLocalDescription(await pc.createAnswer())
+          this.pubsub.emit(peerId, 'exchange', {sdp: pc.localDescription})
+        } else if (data.sdp.type === 'answer') {
+          await pc.setRemoteDescription(new RTCSessionDescription(data.sdp))
+        } else {
+          console.log('Unsupported SDP type. Your code may differ here.')
+        }
       }
-    }
 
-    if (data.candidates) {
-      console.log('Adding candidates...')
+      if (data.candidates) {
+        console.log('Adding candidates...')
+
+      //  if (!this.peers[peerId].watchdog && pc.iWillRetry) {
+      //    this.peers[peerId].watchdog = setTimeout(this.peers[peerId].watchdogFunction, 7500)
+      //  }
+
+        for (const c of data.candidates) {
+          await pc.addIceCandidate(new RTCIceCandidate(c))
+        }
+      }
+    } catch (err) {
+      console.log('ACHTUNG', err)
 
       if (!this.peers[peerId].watchdog && pc.iWillRetry) {
-        this.peers[peerId].watchdog = setTimeout(this.peers[peerId].watchdogFunction, 7500)
-      }
-
-      for (const c of data.candidates) {
-        await pc.addIceCandidate(new RTCIceCandidate(c))
+        this.peers[peerId].watchdog = setTimeout(this.peers[peerId].watchdogFunction, 500)
       }
     }
   }
