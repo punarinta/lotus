@@ -147,12 +147,12 @@ export default class RoomScreen extends Component {
         this.dataSend(1, peerId, JSON.stringify({cmd: 'syncReq', lastSeen: peerUser ? peerUser.lastSeen : null}))
       }
       if (pc.iceConnectionState === 'checking') {
-        /*if (pc.iWillRetry) {
+        if (pc.iWillRetry) {
           if (pc.watchdog) {
             clearTimeout(pc.watchdog)
           }
           pc.watchdog = setTimeout(pc.watchdogFunction, 10000, true)
-        }*/
+        }
       }
 
       if (pc.iceConnectionState === 'disconnected') {
@@ -237,6 +237,7 @@ export default class RoomScreen extends Component {
           // TODO: if json.lastSeen < $.accounts[0].lastUpd => send full profile
         //  this.dataSend(1, peerId, JSON.stringify({cmd: 'syncResp', info: $.accounts[0]}))
           const msgsToSync = MessageSvc.getFromTs(this.roomId, null, json.lastSeen)
+          console.log('msgsToSync', json.lastSeen, msgsToSync)
           for (const m of msgsToSync) {
             this.dataSend(0, peerId, m.body)
           }
@@ -255,8 +256,12 @@ export default class RoomScreen extends Component {
 
   async createOffer(peerId) {
     const pc = this.peers[peerId]
-    await pc.setLocalDescription(await pc.createOffer())
-    this.pubsub.emit(peerId, 'exchange', {sdp: pc.localDescription, userId: $.accounts[0].id})
+    try {
+      await pc.setLocalDescription(await pc.createOffer())
+      this.pubsub.emit(peerId, 'exchange', {sdp: pc.localDescription, userId: $.accounts[0].id})
+    } catch (err) {
+      console.error('ACHTUNG 1', err)
+    }
   }
 
   exchange = async (data) => {
@@ -291,7 +296,7 @@ export default class RoomScreen extends Component {
         }
       }
     } catch (err) {
-      console.log('ACHTUNG', err)
+      console.log('ACHTUNG 2', err)
 
       if (!this.peers[peerId].watchdog && pc.iWillRetry) {
         this.peers[peerId].watchdog = setTimeout(this.peers[peerId].watchdogFunction, 500)
