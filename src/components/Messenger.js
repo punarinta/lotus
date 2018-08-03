@@ -66,7 +66,7 @@ export default class Messenger extends Component {
     return (
       <KeyboardAvoidingView
         style={styles.container}
-        {...Platform.select({'ios': {behavior:'padding', keyboardVerticalOffset:20}})}
+        {...Platform.select({'ios': {behavior:'padding', keyboardVerticalOffset: 20}})}
       >
         <FlatList
           ref="msgs"

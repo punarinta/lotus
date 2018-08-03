@@ -100,7 +100,7 @@ export default class RoomScreen extends Component {
   createPC(peerId, isOffer, userId = null) {
     const pc = new RTCPeerConnection(webRTCConfig)
 
-    ProfileSvc.update(userId, {peerId, lastSeen: (new Date).getTime()})
+    ProfileSvc.update(userId, {peerId})
 
     let candidates = []
     let candyWatch = null
@@ -235,7 +235,7 @@ export default class RoomScreen extends Component {
         case 'syncReq':
           // send a short profile only -- {id, name}
           // TODO: if json.lastSeen < $.accounts[0].lastUpd => send full profile
-        //  this.dataSend(1, peerId, JSON.stringify({cmd: 'syncResp', info: $.accounts[0]}))
+          this.dataSend(1, peerId, JSON.stringify({cmd: 'syncResp', info: $.accounts[0]}))
           const msgsToSync = MessageSvc.getFromTs(this.roomId, null, json.lastSeen)
           console.log('msgsToSync', json.lastSeen, msgsToSync)
           for (const m of msgsToSync) {
