@@ -1,12 +1,9 @@
 import { store } from 'core'
 import I18n from 'i18n'
 import { RTCPeerConnection } from 'react-native-webrtc'
+import vid from 'components/vid'
 
-// TODO: update before release
-const delta = 1533194414684
 const base = 1008
-// TODO: toss before release
-const symbols = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z','#','1','2','3','4','5','6','7','8','9']
 const MBOX_OPEN = 'MBOX_OPEN'
 
 class SysSvc {
@@ -72,7 +69,7 @@ class SysSvc {
    */
   static intToVisual(int) {
     let elements = []
-    let string = (int - delta) + ''
+    let string = (int - vid.delta + 1) + ''
     string = SysSvc.padStart(string, 12, '0').split('').reverse().join('')
     int = string - 0
 
@@ -81,7 +78,7 @@ class SysSvc {
 
     return elements.map(el => {
       return {
-        symbol: symbols[el % 36],
+        symbol: vid.symbols[el % 36],
         color: Math.floor(el / 36) % 7,
         shape: Math.floor(el / 36 / 7) % 4,
       }
@@ -98,7 +95,7 @@ class SysSvc {
     let int = 0, multi = 1
 
     elements = elements.map(el => {
-      return symbols.indexOf(el.symbol) + el.color * 36 + el.shape * 36 * 7
+      return vid.symbols.indexOf(el.symbol) + el.color * 36 + el.shape * 36 * 7
     })
 
     for (let el of elements) {
@@ -108,7 +105,7 @@ class SysSvc {
 
     const string = SysSvc.padStart(int + '', 12, '0').split('').reverse().join('')
 
-    return (string - 0) + delta
+    return (string - 0) + vid.delta - 1
   }
 
   /**
@@ -119,12 +116,13 @@ class SysSvc {
    * @returns {Promise<any>}
    */
   static pingStun(server, timeout = 3000) {
-    const ts1 = (new Date).getTime()
-    const candies = []
+    const
+      candies = [],
+      ts1 = (new Date).getTime(),
+      pc = new RTCPeerConnection({iceServers:[{'urls': 'stun:' + server}]})
 
     return Promise.race([
       new Promise(async (resolve) => {
-        const pc = new RTCPeerConnection({iceServers:[{'urls': 'stun:' + server}]})
         pc.onicecandidate = (event) => {
           candies.push(event.candidate)
         }
@@ -139,7 +137,10 @@ class SysSvc {
         pc.setLocalDescription(desc)
       }),
       new Promise((resolve) =>
-        setTimeout(() => resolve([1, timeout, candies.length]), timeout)
+        setTimeout(() => {
+          pc.close()
+          resolve([1, timeout, candies.length])
+        }, timeout)
       )
     ])
   }

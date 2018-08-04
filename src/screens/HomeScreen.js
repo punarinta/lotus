@@ -6,6 +6,7 @@ import GroupAddSvg from 'components/svg/GroupAdd'
 import { ProfileSvc } from 'services/profile'
 import { SysSvc } from 'services/sys'
 import store from 'core/store'
+import AddRoomModal from 'modals/AddRoom'
 
 export default class HomeScreen extends Component {
 
@@ -22,16 +23,12 @@ export default class HomeScreen extends Component {
     store.unbind(['ROOMS_UPDATED'], this.updateRooms)
   }
 
-  addChat = () => {
-
+  addRoom = (id) => {
+    console.log('Room ID', id)
   }
 
   updateRooms = () => {
     this.setState({updateRooms: Math.random()})
-  }
-
-  async componentDidMount() {
-    console.log('Ping', await SysSvc.pingStun('stun.l.google.com:19302'))
   }
 
   render() {
@@ -44,10 +41,14 @@ export default class HomeScreen extends Component {
         <TouchableOpacity
           style={styles.addChat}
           activeOpacity={0.8}
-          onPress={this.addChat}
+          onPress={() => this.refs.addRoom.open()}
         >
           <GroupAddSvg color={Theme.black}/>
         </TouchableOpacity>
+        <AddRoomModal
+          ref="addRoom"
+          onSelect={this.addRoom}
+        />
       </View>
     )
   }

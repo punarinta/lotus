@@ -13,7 +13,7 @@ export default class InterwebzNotice extends Component {
     modalVisible: false,
   }
 
-  open = () => {
+  open() {
     this.setState({modalVisible: true})
   }
 

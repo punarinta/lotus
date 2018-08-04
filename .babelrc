@@ -14,6 +14,7 @@
           "screens": "./src/screens",
           "services": "./src/services",
           "components": "./src/components",
+          "svg": "./src/components/svg",
           "config": "./src/config"
         }
       }

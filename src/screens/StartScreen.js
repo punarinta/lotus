@@ -3,12 +3,12 @@ import { View, StyleSheet, Dimensions, Text, Animated, Keyboard, TouchableOpacit
 import { NavigationActions, StackActions } from 'react-navigation'
 import Button from 'components/Button'
 import TextInput from 'components/TextInput'
-import VisualId from 'components/VisualId'
+import VisualView from 'components/vid/View'
 import Theme from 'config/theme'
 import LogoSvg from 'components/svg/Logo'
 import RenewSvg from 'components/svg/Renew'
 import store from 'core/store'
-import I18n from "../i18n"
+import I18n from 'i18n'
 
 export default class StartScreen extends Component {
 
@@ -62,7 +62,7 @@ export default class StartScreen extends Component {
             </View>
           </Animated.View>
           <View style={{flexDirection: 'row'}}>
-            <VisualId id={this.state.id} />
+            <VisualView id={this.state.id} />
             <TouchableOpacity onPress={this.regenerate} style={{justifyContent: 'center', marginLeft: 8}}>
               <RenewSvg color={Theme.gray}/>
             </TouchableOpacity>
