@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native'
 import Theme from 'config/theme'
 import { MessageSvc } from 'services/message'
-import I18n from '/i18n'
+import I18n from 'i18n'
 
 export default class ChatRow extends Component {
 
@@ -14,25 +14,26 @@ export default class ChatRow extends Component {
 
   render() {
 
-    const lastSeen = MessageSvc.readableTs(this.props.lastSeen)
+    const { lastSeen, id, name } = this.props
+    const ts = MessageSvc.readableTs(lastSeen)
 
     let
-      avaText = this.props.name.match(/\b\w/g) || []
+      avaText = name.match(/\b\w/g) || []
       avaText = ((avaText.shift() || '') + (avaText.pop() || '')).toUpperCase()
 
     return (
       <TouchableOpacity
         style={styles.container}
         activeOpacity={0.8}
-        onPress={() => $.navigator.navigate('Room', { peer: this.props.id })}
-        onLongPress={() => $.navigator.navigate('Room', { peer: this.props.id })}
+        onPress={() => $.navigator.navigate('Room', { peer: id })}
+        onLongPress={() => $.navigator.navigate('Room', { peer: id })}
       >
         <View style={styles.ava}>
           <Text style={styles.avaText}>{ avaText }</Text>
         </View>
         <View style={styles.notAva}>
-          <Text style={styles.nameText}>{ this.props.name }</Text>
-          <Text style={styles.lastSeen}>Last seen: { lastSeen }</Text>
+          <Text style={styles.nameText}>{ name }</Text>
+          <Text style={styles.lastSeen}>Last seen: { lastSeen ? ts : I18n.t('never') }</Text>
         </View>
       </TouchableOpacity>
     )
@@ -61,8 +62,6 @@ const styles = StyleSheet.create({
     elevation: 3, // android
   },
   notAva: {
-    // borderBottomWidth: StyleSheet.hairlineWidth,
-    // borderBottomColor: Theme.gray,
     flex: 1,
     height: 64,
     justifyContent: 'center',
@@ -71,7 +70,6 @@ const styles = StyleSheet.create({
     color: Theme.black,
     fontSize: 18,
     paddingBottom: 2,
-    // fontFamily: Theme.condensedFont,
   },
   nameText: {
     fontSize: 15,

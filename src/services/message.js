@@ -48,6 +48,11 @@ class MessageSvc {
    * @returns {string}
    */
   static readableTs(ts) {
+
+    if (!ts) {
+      return I18n.t('never')
+    }
+
     const
       td = new Date,
       nums = num => num > 9 ? num : '0' + num

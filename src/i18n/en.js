@@ -1,5 +1,6 @@
 export default {
   monthsShort: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+  never: 'never',
   buttons: {
     ok: 'OK',
     retry: 'Retry',

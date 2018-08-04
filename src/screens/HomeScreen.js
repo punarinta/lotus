@@ -25,6 +25,11 @@ export default class HomeScreen extends Component {
 
   addRoom = (id) => {
     console.log('Room ID', id)
+    if (!$.phonebook[id]) {
+      $.phonebook[id] = { name: 'New one' }
+      // store.sync()
+      this.updateRooms()
+    }
   }
 
   updateRooms = () => {
