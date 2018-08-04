@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native'
+import {View, Text, StyleSheet, TouchableOpacity, Animated} from 'react-native'
 import { RTCPeerConnection, RTCIceCandidate, RTCSessionDescription } from 'react-native-webrtc'
 import Theme from 'config/theme'
 import { PubSub } from 'services/pubsub'
@@ -10,6 +10,7 @@ import { MessageSvc } from 'services/message'
 import I18n from 'i18n'
 import { sha256 } from 'js-sha256'
 import HomeSvg from 'components/svg/Home'
+import MoreSvg from 'components/svg/More'
 import store from 'core/store'
 
 const webRTCConfig = {iceCandidatePoolSize: 16, 'iceServers': [{'urls': 'stun:stun.l.google.com:19302'}]}
@@ -23,9 +24,13 @@ export default class RoomScreen extends Component {
 
     this.state = {
       isAVOn: false,
+      menuShown: false,
       connStates: {},
       remoteStreams: {},
     }
+
+    this.animMenuValue = new Animated.Value(0)
+    this.animMenuAngle = this.animMenuValue.interpolate({inputRange: [0, 1], outputRange: ['0deg', '90deg']})
   }
 
   get navParams() {
@@ -321,6 +326,12 @@ export default class RoomScreen extends Component {
     store.emit('ROOMS_UPDATED')
   }
 
+  toggleMenu = () => {
+    const menuShown = !this.state.menuShown
+    Animated.timing(this.animMenuValue, {toValue: menuShown * 1, duration: 100, useNativeDriver: true}).start()
+    this.setState({menuShown})
+  }
+
   render() {
     const { remoteStreams, isAVOn, connStates } = this.state
     const peerUser = ProfileSvc.get(this.navParams.peer)
@@ -342,7 +353,15 @@ export default class RoomScreen extends Component {
               { connStates[peerUser.peerId] || 'offline' }
             </Text>
           </View>
-
+          <TouchableOpacity
+            style={[styles.navButton, {marginLeft: 'auto'}]}
+            onPress={this.toggleMenu}
+            activeOpacity={1}
+          >
+            <Animated.View style={{transform: [{rotate: this.animMenuAngle}] }}>
+              <MoreSvg/>
+            </Animated.View>
+          </TouchableOpacity>
         </View>
         <Messenger
           ref="msg"
