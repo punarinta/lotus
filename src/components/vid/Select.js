@@ -35,25 +35,28 @@ export default class Select extends Component {
   }
 
   renderOptions() {
-    switch (this.state.detSelected) {
+    const { elements, selected, detSelected } = this.state
+    const sortedSymbols = vid.symbols.slice().sort()
+
+    switch (detSelected) {
       case 'symbol':
         // TODO: order alphanumerically to hide the toss
-        return vid.symbols.map((el, i) => {
-          return <TouchableOpacity key={i} onPress={() => this.detChanged(el)} style={styles.option}>
+        return sortedSymbols.map((el, i) => {
+          return <TouchableOpacity key={i} onPress={() => this.detChanged(el)} style={[styles.option, el === elements[selected][detSelected] && {backgroundColor: Theme.lightGray}]}>
             <Text style={{fontFamily: Theme.monoFont}}>{ el }</Text>
           </TouchableOpacity>
         })
 
       case 'shape':
         return [0,1,2,3].map((el, i) => {
-          return <TouchableOpacity key={i} onPress={() => this.detChanged(el)} style={styles.option}>
+          return <TouchableOpacity key={i} onPress={() => this.detChanged(el)} style={[styles.option, el === elements[selected][detSelected] && {backgroundColor: Theme.lightGray}]}>
             <Svg shape={el} size={24} color={Theme.gray} />
           </TouchableOpacity>
         })
 
       case 'color':
         return [0,1,2,3,4,5,6].map((el, i) => {
-          return <TouchableOpacity key={i} onPress={() => this.detChanged(el)} style={styles.option}>
+          return <TouchableOpacity key={i} onPress={() => this.detChanged(el)} style={[styles.option, el === elements[selected][detSelected] && {backgroundColor: Theme.lightGray}]}>
             <Color color={el} style={styles.colorPatch} />
           </TouchableOpacity>
         })
@@ -62,7 +65,7 @@ export default class Select extends Component {
 
   render() {
 
-    const { elements, selected } = this.state
+    const { elements, selected, detSelected } = this.state
 
     return (
       <View>
@@ -84,13 +87,13 @@ export default class Select extends Component {
           }
         </View>
         <View style={styles.details}>
-          <TouchableOpacity style={styles.detail} onPress={() => this.detShow('symbol')}>
+          <TouchableOpacity style={[styles.detail, detSelected === 'symbol' && styles.selDetail]} onPress={() => this.detShow('symbol')}>
             <Text style={{color: Theme.black, fontSize: 18}}>{ elements[selected].symbol }</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.detail} onPress={() => this.detShow('shape')}>
+          <TouchableOpacity style={[styles.detail, detSelected === 'shape' && styles.selDetail]} onPress={() => this.detShow('shape')}>
             <Svg shape={elements[selected].shape} size={36} color={Theme.gray} />
           </TouchableOpacity>
-          <TouchableOpacity style={styles.detail} onPress={() => this.detShow('color')}>
+          <TouchableOpacity style={[styles.detail, detSelected === 'color' && styles.selDetail]} onPress={() => this.detShow('color')}>
             <Color color={elements[selected].color} style={styles.colorPatch} />
           </TouchableOpacity>
         </View>
@@ -114,7 +117,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   selItem: {
-    backgroundColor: Theme.lightGray,
+    backgroundColor: '#f2f2f2',
   },
   symbol: {
     fontSize: 14,
@@ -124,7 +127,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
   },
   details: {
-    backgroundColor: Theme.lightGray,
+    backgroundColor: '#f2f2f2',
     flexDirection: 'row',
     height: 48,
   },
@@ -134,15 +137,20 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     flex: 1,
   },
+  selDetail: {
+    backgroundColor: Theme.lightGray,
+  },
   options: {
     flexDirection: 'row',
     maxWidth: Theme.width * 0.75,
     flexWrap: 'wrap',
+    backgroundColor: '#f2f2f2',
   },
   option: {
     padding: 8,
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: '#f2f2f2',
   },
   colorPatch: {
     width: 24,
