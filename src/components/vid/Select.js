@@ -43,14 +43,14 @@ export default class Select extends Component {
         // TODO: order alphanumerically to hide the toss
         return sortedSymbols.map((el, i) => {
           return <TouchableOpacity key={i} onPress={() => this.detChanged(el)} style={[styles.option, el === elements[selected][detSelected] && {backgroundColor: Theme.lightGray}]}>
-            <Text style={{fontFamily: Theme.monoFont}}>{ el }</Text>
+            <Text style={{fontFamily: Theme.monoFont, paddingHorizontal: 4}}>{ el }</Text>
           </TouchableOpacity>
         })
 
       case 'shape':
         return [0,1,2,3].map((el, i) => {
           return <TouchableOpacity key={i} onPress={() => this.detChanged(el)} style={[styles.option, el === elements[selected][detSelected] && {backgroundColor: Theme.lightGray}]}>
-            <Svg shape={el} size={24} color={Theme.gray} />
+            <Svg shape={el} size={36} color={Theme.gray} />
           </TouchableOpacity>
         })
 
@@ -117,7 +117,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   selItem: {
-    backgroundColor: '#f2f2f2',
+    backgroundColor: Theme.lightGray,
   },
   symbol: {
     fontSize: 14,
@@ -145,6 +145,7 @@ const styles = StyleSheet.create({
     maxWidth: Theme.width * 0.75,
     flexWrap: 'wrap',
     backgroundColor: '#f2f2f2',
+    justifyContent: 'space-between'
   },
   option: {
     padding: 8,

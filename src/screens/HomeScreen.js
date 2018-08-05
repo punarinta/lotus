@@ -37,10 +37,10 @@ export default class HomeScreen extends Component {
     this.setState({addShown})
   }
 
-  addRoom = (id) => {
+  addRoom = (id, name) => {
     console.log('Room ID', id)
     if (!$.phonebook[id]) {
-      $.phonebook[id] = { name: 'New one' }
+      $.phonebook[id] = { name }
       // store.sync()
       this.updateRooms()
     }
@@ -62,7 +62,7 @@ export default class HomeScreen extends Component {
           <TouchableOpacity
             style={styles.addChat}
             activeOpacity={0.8}
-            onPress={() => this.refs.addRoom.open()}
+            onPress={() => { this.addToggle(); this.refs.addRoom.open() }}
           >
             <PersonAddSvg color={Theme.black}/>
           </TouchableOpacity>
@@ -93,7 +93,7 @@ export default class HomeScreen extends Component {
 
         <AddRoomModal
           ref="addRoom"
-          onSelect={this.addRoom}
+          onDone={this.addRoom}
         />
       </View>
     )
@@ -108,7 +108,8 @@ const styles = StyleSheet.create({
   action: {
     position: 'absolute',
     right: 18,
-    bottom: 18,
+    bottom: 10,
+    paddingBottom: 8,
   },
   addChat: {
     backgroundColor: Theme.white,

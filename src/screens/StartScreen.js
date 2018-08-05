@@ -18,7 +18,7 @@ export default class StartScreen extends Component {
 
   state = {
     id: (new Date).getTime(),
-    name: I18n.t('start.anon') + Math.round((1000 + Math.random() * 8999)) + '',
+    name: I18n.tx('anon', {vars:[Math.round((1000 + Math.random() * 8999))]}),
     nameWasChanged: false,
   }
 

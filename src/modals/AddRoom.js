@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
-import { View, StyleSheet, Modal, Text, TouchableOpacity, Dimensions, Platform } from 'react-native'
+import { View, StyleSheet, Modal, TouchableOpacity, Dimensions, StatusBar, Platform } from 'react-native'
 import Button from 'components/Button'
+import TextInput from 'components/TextInput'
 import VisualSelect from 'components/vid/Select'
 
 import Theme from 'config/theme'
@@ -9,23 +10,34 @@ import I18n from 'i18n'
 export default class AddRoom extends Component {
 
   static defaultProps = {
-    onSelect: () => null,
+    onDone: () => null,
   }
 
   state = {
     value: 0,
+    name: '',
     modalVisible: false,
   }
 
   open = () => {
     this.setState({
+      name: '',
+      value: 0,
       modalVisible: true,
     })
+    if (Platform.OS === 'android') {
+      StatusBar.setBackgroundColor('#808080')
+    }
   }
 
   close(ret = false) {
     this.setState({modalVisible: false})
-    if (ret) this.props.onSelect(this.state.value)
+    if (ret) {
+      this.props.onDone(this.state.value, this.state.name.length ? this.state.name : I18n.tx('anon', {vars:[Math.round((1000 + Math.random() * 8999))]}))
+    }
+    if (Platform.OS === 'android') {
+      StatusBar.setBackgroundColor(Theme.white)
+    }
   }
 
   render() {
@@ -42,13 +54,23 @@ export default class AddRoom extends Component {
           activeOpacity={1}
           onPress={() => this.close()}
         >
-          <View style={styles.container}>
+          <View style={styles.container} onStartShouldSetResponder={() => true}>
+            <View style={{height: 64, width: width * 0.8 - 20}}>
+              <TextInput title="Name" onChange={(name) => this.setState({name})}/>
+            </View>
             <VisualSelect onChange={(value) => this.setState({value})} />
-            <Button
-              caption={I18n.t('buttons.ok')}
-              onPress={() => this.close(true)}
-              style={{marginTop: 16}}
-            />
+            <View style={{marginTop: 16, flexDirection: 'row'}}>
+              <Button
+                caption={I18n.t('buttons.cancel')}
+                onPress={() => this.close()}
+                style={{marginRight: 16}}
+              />
+              <Button
+                active={!!this.state.name.length}
+                caption={I18n.t('buttons.ok')}
+                onPress={() => this.close(true)}
+              />
+            </View>
           </View>
         </TouchableOpacity>
       </Modal>
