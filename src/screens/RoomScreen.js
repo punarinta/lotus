@@ -220,8 +220,6 @@ export default class RoomScreen extends Component {
 
   dataSend = (chId, peerId, data) => {
 
-    console.log('RRR', chId, peerId, data)
-
     if (typeof data !== 'string') data = JSON.stringify(data)
 
     if (typeof data !== 'string') {
@@ -245,7 +243,16 @@ export default class RoomScreen extends Component {
 
     // hardcode data channel subscribers
     if (this.refs.msg) this.refs.msg.takeData(chId, peerId, data)
-    if (this.refs.sk && chId === 2) this.refs.sk.takeData(chId, peerId, data)
+    if (chId === 2) {
+      if (!this.state.isSketchOn) {
+        this.setState({isSketchOn: true})
+        setTimeout(() => {
+          if (this.refs.sk) this.refs.sk.takeData(chId, peerId, data)
+        }, 100)
+      } else {
+        if (this.refs.sk) this.refs.sk.takeData(chId, peerId, data)
+      }
+    }
 
     if (chId === 1) {
       const json = JSON.parse(data)

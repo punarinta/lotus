@@ -132,7 +132,7 @@ class ProfileSvc {
   static updateByPeerId(peerId, info) {
     for (const id in $.phonebook) {
       if ($.phonebook[id].peerId === peerId) {
-        return ProfileSvc.set(id, info)
+        return ProfileSvc.update(id, info)
       }
     }
     return null
