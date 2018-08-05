@@ -8,7 +8,7 @@ export default class ChatRow extends Component {
 
   static defaultProps = {
     id: null,
-    name: null,
+    name: '',
     lastSeen: null,
   }
 
