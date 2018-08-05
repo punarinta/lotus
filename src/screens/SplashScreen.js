@@ -55,6 +55,7 @@ export default class SplashScreen extends Component {
       phonebook: {},
       rooms: {},
       accounts: [],
+      currentSketch: [],
     }, $)
 
     // TODO: remove before release

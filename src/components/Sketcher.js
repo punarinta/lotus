@@ -20,11 +20,18 @@ export default class Sketcher extends Component {
     if (typeof data === 'string') data = JSON.parse(data)
     if (data.add) {
       if (this.refs.draw) this.refs.draw.addPath(data.add)
+      $.currentSketch.push(data.add)
     }
   }
 
   onPathAdded = (path) => {
+    $.currentSketch.push(path)
     this.props.onNewData(2, null, {add: path})
+  }
+
+  close = () => {
+    $.currentSketch = []
+    this.props.onClose()
   }
 
   render() {
@@ -34,12 +41,13 @@ export default class Sketcher extends Component {
       <View style={[styles.container, this.props.style]}>
         <TouchableOpacity
           style={styles.close}
-          onPress={this.props.onClose}
+          onPress={this.close}
         >
           <CloseSvg />
         </TouchableOpacity>
 
         <FingerDraw
+          initWith={$.currentSketch}
           width={width}
           height={height}
           ref="draw"

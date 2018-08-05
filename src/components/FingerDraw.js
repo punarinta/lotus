@@ -11,6 +11,7 @@ export default class FingerDraw extends Component {
 
   static defaultProps = {
     onPathAdded: () => null,
+    initWith: [],
   }
 
   constructor(props) {
@@ -25,6 +26,15 @@ export default class FingerDraw extends Component {
       onPanResponderMove: (evt, gs) => this.onFingerMove(evt, gs),
       onPanResponderRelease: (evt, gs) => this.onFingerUp(evt, gs),
     })
+  }
+
+  componentDidMount() {
+    const paths = []
+    this.pathsToReturn = this.props.initWith
+    for (const p of this.pathsToReturn) {
+      paths.push(this.preRenderString(string))
+    }
+    this.setState({paths})
   }
 
   componentWillReceiveProps() {
