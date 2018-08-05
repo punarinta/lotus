@@ -24,7 +24,13 @@ export default class Sketcher extends Component {
     }
   }
 
+  reset() {
+    $.currentSketch = []
+    this.setState({random: Math.random()})
+  }
+
   componentDidMount() {
+    this.props.onNewData(1, null, {cmd: 'clearSketch'})
     Keyboard.dismiss()
   }
 

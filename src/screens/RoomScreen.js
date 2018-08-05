@@ -273,6 +273,10 @@ export default class RoomScreen extends Component {
           ProfileSvc.update(json.info.id, json.info)
           break
 
+        case 'clearSketch':
+          if (this.state.isSketchOn && this.refs.sk) this.refs.sk.reset()
+          break
+
         default:
       }
     }
