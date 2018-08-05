@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import {View, Text, StyleSheet, TouchableOpacity, Animated} from 'react-native'
+import { View, Text, StyleSheet, TouchableOpacity, Animated, AppState } from 'react-native'
 import { RTCPeerConnection, RTCIceCandidate, RTCSessionDescription } from 'react-native-webrtc'
 import Theme from 'config/theme'
 import { PubSub } from 'services/pubsub'
@@ -27,6 +27,7 @@ export default class RoomScreen extends Component {
       isAVOn: false,
       isSketchOn: false,
       menuShown: false,
+      appState: AppState.currentState,
       connStates: {},
       remoteStreams: {},
     }
@@ -82,10 +83,20 @@ export default class RoomScreen extends Component {
 
     // tell everyone in the chat that you join with ID $.sessionId
     this.transport.emit(null, 'join', [$.sessionId, $.accounts[0].id])
+
+    AppState.addEventListener('change', this.handleAppStateChange)
   }
 
   componentWillUnmount() {
+    AppState.removeEventListener('change', this.handleAppStateChange)
     this.leaveChat()
+  }
+
+  handleAppStateChange = (nextAppState) => {
+    if (this.state.appState.match(/inactive|background/) && nextAppState === 'active') {
+  //    this.transport.emit(null, 'join', [$.sessionId, $.accounts[0].id])
+    }
+    this.setState({appState: nextAppState})
   }
 
   onStreamChange = (state, stream = null, callback = () => null) => {
