@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { StyleSheet, View, PanResponder } from 'react-native'
+import { View, PanResponder } from 'react-native'
 import Svg, { Path } from 'react-native-svg'
 import Theme from 'config/theme'
 
@@ -8,6 +8,10 @@ export default class FingerDraw extends Component {
   ptdata = []
   evCounter = 0
   pathsToReturn = []
+
+  static defaultProps = {
+    onPathAdded: () => null,
+  }
 
   constructor(props) {
     super(props)
@@ -19,34 +23,25 @@ export default class FingerDraw extends Component {
       onMoveShouldSetPanResponder: () => true,
       onPanResponderGrant: (evt, gs) => this.onFingerDown(evt, gs),
       onPanResponderMove: (evt, gs) => this.onFingerMove(evt, gs),
-      onPanResponderRelease: (evt, gs) => this.onFingerUp(evt, gs)
+      onPanResponderRelease: (evt, gs) => this.onFingerUp(evt, gs),
     })
   }
 
-  componentWillReceiveProps(props) {
+  componentWillReceiveProps() {
     this.pathsToReturn = []
     this.setState({paths: []})
   }
 
   getData() {
-    const { width, height } = this.props
+    return this.pathsToReturn
+  }
 
-    // cleanup elements
-    let elements = [], returnData = {
-      width,
-      height,
-      paths: this.pathsToReturn,
-    }
+  addPath(string) {
+    const paths = this.state.paths
 
-    if (this.props.elements) {
-      for (const element of this.props.elements) {
-        delete element.fill
-        elements.push(element)
-      }
-      returnData.elements = elements
-    }
-
-    return returnData
+    paths[paths.length - 1] = this.preRenderString(string)
+    this.pathsToReturn.push(string)
+    this.setState({paths})
   }
 
   onFingerDown(ev) {
@@ -67,8 +62,8 @@ export default class FingerDraw extends Component {
       return false
     }
 
-    // the very first one should pass
-    if ((this.evCounter++) % 3) {
+    // the very first one must pass
+    if ((this.evCounter++) % 2) {
       return false
     }
 
@@ -104,6 +99,7 @@ export default class FingerDraw extends Component {
     paths[paths.length - 1] = this.preRenderString(string)
     this.pathsToReturn.push(string)
     this.setState({paths})
+    this.props.onPathAdded(string)
   }
 
   preRenderString(string) {
@@ -115,7 +111,7 @@ export default class FingerDraw extends Component {
 
     return (
       <View
-        style={[styles.container, {width, height}, this.props.style]}
+        style={[{width, height}, this.props.style]}
         renderToHardwareTextureAndroid={true}
         {...this.panResponder.panHandlers}
       >
@@ -126,14 +122,6 @@ export default class FingerDraw extends Component {
     )
   }
 }
-
-const styles = StyleSheet.create({
-  container: {
-    borderColor: '#ccc',
-    borderWidth: Theme.isTablet ? 2 : 1,
-  },
-})
-
 
 // to suit your point format, run search/replace for '.x' and '.y'
 // for 3D version, see 3d branch (configurability would draw significant performance overhead)

@@ -8,11 +8,23 @@ export default class Sketcher extends Component {
 
   static defaultProps = {
     onClose: () => null,
+    onNewData: () => null,
   }
 
   state = {
     width: Theme.width,
     height: Theme.height,
+  }
+
+  takeData(chId, peerId, data) {
+    if (typeof data === 'string') data = JSON.parse(data)
+    if (data.add) {
+      if (this.refs.draw) this.refs.draw.addPath(data.add)
+    }
+  }
+
+  onPathAdded = (path) => {
+    this.props.onNewData(2, null, {add: path})
   }
 
   render() {
@@ -27,7 +39,12 @@ export default class Sketcher extends Component {
           <CloseSvg />
         </TouchableOpacity>
 
-        <FingerDraw width={width} height={height} />
+        <FingerDraw
+          width={width}
+          height={height}
+          ref="draw"
+          onPathAdded={this.onPathAdded}
+        />
 
       </View>
     )

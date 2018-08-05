@@ -53,7 +53,7 @@ export default class RoomScreen extends Component {
       return false
     }
 
-    this.transport = new PubSub(false, '46.101.117.47/', this.roomId, { onSuggestedReopening: (code) => {
+    this.transport = new PubSub(false, '198.199.124.4/', this.roomId, { onSuggestedReopening: (code) => {
       console.log('WARNING: onSuggestedReopening was triggered with error code ' + code)
       this.initTransport()
     }})
@@ -205,7 +205,7 @@ export default class RoomScreen extends Component {
       }
     }
 
-    ['text', 'aux'].forEach((chName, id) => {
+    ['text', 'aux', 'sketch'].forEach((chName, id) => {
       const ch = pc.createDataChannel(chName, {negotiated: true, id})
       ch.onmessage = (event) => this.onDataRead(id, peerId, event.data)
       pc.dataChannels[id] = ch
@@ -219,6 +219,8 @@ export default class RoomScreen extends Component {
   }
 
   dataSend = (chId, peerId, data) => {
+
+    console.log('RRR', chId, peerId, data)
 
     if (typeof data !== 'string') data = JSON.stringify(data)
 
@@ -243,6 +245,7 @@ export default class RoomScreen extends Component {
 
     // hardcode data channel subscribers
     if (this.refs.msg) this.refs.msg.takeData(chId, peerId, data)
+    if (this.refs.sk && chId === 2) this.refs.sk.takeData(chId, peerId, data)
 
     if (chId === 1) {
       const json = JSON.parse(data)
@@ -401,6 +404,7 @@ export default class RoomScreen extends Component {
             ref="sk"
             style={{position: 'absolute', top: 0, left: 0}}
             onClose={() => this.setState({isSketchOn: false})}
+            onNewData={this.dataSend}
           />
         }
       </View>
