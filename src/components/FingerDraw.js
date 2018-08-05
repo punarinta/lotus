@@ -38,8 +38,12 @@ export default class FingerDraw extends Component {
   }
 
   componentWillReceiveProps() {
-    this.pathsToReturn = []
-    this.setState({paths: []})
+    const paths = []
+    this.pathsToReturn = this.props.initWith
+    for (const p of this.pathsToReturn) {
+      paths.push(this.preRenderString(string))
+    }
+    this.setState({paths})
   }
 
   getData() {
