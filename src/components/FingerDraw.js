@@ -32,7 +32,7 @@ export default class FingerDraw extends Component {
     const paths = []
     this.pathsToReturn = this.props.initWith
     for (const p of this.pathsToReturn) {
-      paths.push(this.preRenderString(string))
+      paths.push(this.preRenderString(p))
     }
     this.setState({paths})
   }
@@ -41,7 +41,7 @@ export default class FingerDraw extends Component {
     const paths = []
     this.pathsToReturn = this.props.initWith
     for (const p of this.pathsToReturn) {
-      paths.push(this.preRenderString(string))
+      paths.push(this.preRenderString(p))
     }
     this.setState({paths})
   }
