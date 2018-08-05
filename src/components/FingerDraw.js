@@ -39,7 +39,7 @@ export default class FingerDraw extends Component {
   addPath(string) {
     const paths = this.state.paths
 
-    paths[paths.length - 1] = this.preRenderString(string)
+    paths.unshift(this.preRenderString(string))
     this.pathsToReturn.push(string)
     this.setState({paths})
   }
