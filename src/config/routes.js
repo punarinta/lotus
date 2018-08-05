@@ -19,7 +19,7 @@ const headerStyles = {
   headerTintColor: Theme.black,
 }
 
-const navigationOptions = {header: null}
+const navigationOptions = {header: null, gesturesEnabled: false}
 
 export default {
   Splash: { screen: SplashScreen, navigationOptions },
