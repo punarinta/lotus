@@ -12,7 +12,6 @@ Other features:
 * file transfer
 * avatars
 * custom emojis
-* collaborative sketching
 * account switching
 * server federation (Redis and Redisless)
 * translations
