@@ -61,7 +61,7 @@ export default class MessageBox extends Component {
           activeOpacity={this.state.cancelable ? 0.8 : 1}
           onPress={this.state.cancelable ? this.close : null}
         >
-          <View style={styles.container}>
+          <View style={styles.container} onStartShouldSetResponder={() => true}>
             <Text style={styles.header}>{ this.state.head }</Text>
             <Text style={styles.text}>{ this.state.text }</Text>
             {

@@ -6,7 +6,6 @@ To fix:
 
 Prio features:
 * save last 100 messages in every chat
-* "add a room" dialog
 * 
 
 Other features:
@@ -18,9 +17,9 @@ Other features:
 * server federation (Redis and Redisless)
 * translations
 * settings page (TCP skipping, show-me-writing, STUN server, signalling server)
-* update lastSeen on disconnect
 * show when somebody is writing
 * lotus.nisdos.com HTTPS signalling
 * optimize dumps to AsyncStorage
 * hostility monitor
+* debug mode (activated on 10 sec longtap on "+")
 * 

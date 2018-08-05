@@ -33,7 +33,7 @@ export default class HomeScreen extends Component {
 
   addToggle = () => {
     const addShown = !this.state.addShown
-    Animated.timing(this.animAddValue, {toValue: addShown * 1, duration: 350, useNativeDriver: true}).start()
+    Animated.timing(this.animAddValue, {toValue: addShown * 1, duration: 300, useNativeDriver: true}).start()
     this.setState({addShown})
   }
 
@@ -58,7 +58,7 @@ export default class HomeScreen extends Component {
           updateRooms={this.state.updateRooms}
         />
 
-        <Animated.View style={[styles.action, {zIndex: 0, transform: [{translateX: this.animAddPosition}], opacity: this.animAddValue }]}>
+        <Animated.View style={[styles.action, {zIndex: 0, opacity: this.animAddValue }]}>
           <TouchableOpacity
             style={styles.addChat}
             activeOpacity={0.8}
@@ -69,16 +69,16 @@ export default class HomeScreen extends Component {
         </Animated.View>
 
         <Animated.View style={[styles.action, {zIndex: 0, transform: [{translateX: this.animAdd2Position}], opacity: this.animAddValue }]}>
-          <TouchableOpacity
+          <View
             style={styles.addChat}
-            activeOpacity={0.8}
+            activeOpacity={1}
             onPress={() => null}
           >
-            <GroupAddSvg color={Theme.black}/>
-          </TouchableOpacity>
+            <GroupAddSvg color={Theme.gray}/>
+          </View>
         </Animated.View>
 
-        <View style={[styles.action, {zIndex: 1}]}>
+        <Animated.View style={[styles.action, {zIndex: 1, transform: [{translateX: this.animAddPosition}] }]}>
           <TouchableOpacity
             style={styles.addChat}
             activeOpacity={0.8}
@@ -88,8 +88,7 @@ export default class HomeScreen extends Component {
               <AddSvg color={Theme.black}/>
             </Animated.View>
           </TouchableOpacity>
-        </View>
-
+        </Animated.View>
 
         <AddRoomModal
           ref="addRoom"

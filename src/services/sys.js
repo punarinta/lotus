@@ -68,6 +68,14 @@ class SysSvc {
    * @returns {{symbol: string, color: number, shape: number}[]}
    */
   static intToVisual(int) {
+    if (int < vid.delta) {
+      console.error('intToVisual error: int < delta')
+      return null
+    }
+    if (int > 10**12 - 2 + vid.delta) {
+      console.error('intToVisual error: int > 10^12 - 2 + delta')
+      return null
+    }
     let elements = []
     let string = (int - vid.delta + 1) + ''
     string = SysSvc.padStart(string, 12, '0').split('').reverse().join('')

@@ -26,7 +26,9 @@ export default class AddRoom extends Component {
       modalVisible: true,
     })
     if (Platform.OS === 'android') {
-      StatusBar.setBackgroundColor('#808080')
+      setTimeout(() => {
+        StatusBar.setBackgroundColor('#808080')
+      }, 160)
     }
   }
 
@@ -44,7 +46,6 @@ export default class AddRoom extends Component {
     return (
       <Modal
         transparent
-        hardwareAccelerated
         style={{backgroundColor: 'transparent'}}
         visible={this.state.modalVisible}
         onRequestClose={() => this.close()}

@@ -4,13 +4,14 @@ import { RTCPeerConnection, RTCIceCandidate, RTCSessionDescription } from 'react
 import Theme from 'config/theme'
 import { PubSub } from 'services/pubsub'
 import Messenger from 'components/Messenger'
+import Sketcher from 'components/Sketcher'
 import AVModal from 'modals/AVModal'
 import { ProfileSvc } from 'services/profile'
 import { MessageSvc } from 'services/message'
 import I18n from 'i18n'
 import { sha256 } from 'js-sha256'
-import HomeSvg from 'components/svg/Home'
-import MoreSvg from 'components/svg/More'
+import HomeSvg from 'svg/Home'
+import MoreSvg from 'svg/More'
 import store from 'core/store'
 
 const webRTCConfig = {iceCandidatePoolSize: 16, 'iceServers': [{'urls': 'stun:stun.l.google.com:19302'}]}
@@ -24,6 +25,7 @@ export default class RoomScreen extends Component {
 
     this.state = {
       isAVOn: false,
+      isSketchOn: false,
       menuShown: false,
       connStates: {},
       remoteStreams: {},
@@ -326,14 +328,23 @@ export default class RoomScreen extends Component {
     store.emit('ROOMS_UPDATED')
   }
 
-  toggleMenu = () => {
-    const menuShown = !this.state.menuShown
+  toggleMenu(explicit = null) {
+    const menuShown = explicit === null ? !this.state.menuShown : explicit
     Animated.timing(this.animMenuValue, {toValue: menuShown * 1, duration: 100, useNativeDriver: true}).start()
     this.setState({menuShown})
   }
 
+  call = () => {
+    this.toggleMenu(false)
+  }
+
+  startSketch = () => {
+    this.toggleMenu(false)
+    this.setState({isSketchOn: true})
+  }
+
   render() {
-    const { remoteStreams, isAVOn, connStates } = this.state
+    const { remoteStreams, isAVOn, isSketchOn, connStates, menuShown } = this.state
     const peerUser = ProfileSvc.get(this.navParams.peer)
 
     return (
@@ -355,7 +366,7 @@ export default class RoomScreen extends Component {
           </View>
           <TouchableOpacity
             style={[styles.navButton, {marginLeft: 'auto'}]}
-            onPress={this.toggleMenu}
+            onPress={() => this.toggleMenu()}
             activeOpacity={1}
           >
             <Animated.View style={{transform: [{rotate: this.animMenuAngle}] }}>
@@ -369,10 +380,27 @@ export default class RoomScreen extends Component {
           onNewData={this.dataSend}
         />
         {
+          menuShown && <View style={styles.menu}>
+            <TouchableOpacity style={styles.menuItem} onPress={this.call}>
+              <Text style={styles.menuItemText}>Call</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.menuItem} onPress={this.startSketch}>
+              <Text style={styles.menuItemText}>Sketch</Text>
+            </TouchableOpacity>
+          </View>
+        }
+        {
           isAVOn && <AVModal
             ref="av"
             remoteStreams={remoteStreams}
             onStreamChange={this.onStreamChange}
+          />
+        }
+        {
+          isSketchOn && <Sketcher
+            ref="sk"
+            style={{position: 'absolute', top: 0, left: 0}}
+            onClose={() => this.setState({isSketchOn: false})}
           />
         }
       </View>
@@ -407,5 +435,25 @@ const styles = StyleSheet.create({
     height: 48,
     justifyContent: 'center',
     alignItems: 'center',
-  }
+  },
+  menu: {
+    position: 'absolute',
+    right: 0,
+    top: 48,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: Theme.gray,
+    borderTopWidth: 0,
+    borderRightWidth: 0,
+    backgroundColor: Theme.white,
+  },
+  menuItem: {
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  menuItemText: {
+    color: Theme.darkGray,
+    fontSize: 16,
+  },
 })

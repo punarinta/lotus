@@ -78,7 +78,7 @@ export default class InterwebzNotice extends Component {
           activeOpacity={1}
           onPress={null}
         >
-          <View style={styles.container}>
+          <View style={styles.container} onStartShouldSetResponder={() => true}>
             <WiFiSvg color={Theme.gray} size={Theme.isTablet ? 128 : 64} />
             <Text style={styles.message}>{ I18n.t('mbox.noInterwebz') }</Text>
             <Button caption={ I18n.t('buttons.retry') } onPress={this.retry}/>
