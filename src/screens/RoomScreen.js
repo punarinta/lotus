@@ -355,6 +355,7 @@ export default class RoomScreen extends Component {
   startSketch = () => {
     this.toggleMenu(false)
     this.setState({isSketchOn: true})
+    this.dataSend(1, null, {cmd: 'clearSketch'})
   }
 
   render() {

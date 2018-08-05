@@ -30,7 +30,6 @@ export default class Sketcher extends Component {
   }
 
   componentDidMount() {
-    this.props.onNewData(1, null, {cmd: 'clearSketch'})
     Keyboard.dismiss()
   }
 
