@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { View, StyleSheet, TouchableOpacity } from 'react-native'
+import { View, StyleSheet, TouchableOpacity, Keyboard } from 'react-native'
 import CloseSvg from 'svg/Close'
 import FingerDraw from 'components/FingerDraw'
 import Theme from 'config/theme'
@@ -22,6 +22,10 @@ export default class Sketcher extends Component {
       if (this.refs.draw) this.refs.draw.addPath(data.add)
       $.currentSketch.push(data.add)
     }
+  }
+
+  componentDidMount() {
+    Keyboard.dismiss()
   }
 
   onPathAdded = (path) => {
